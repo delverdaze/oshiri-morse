@@ -623,8 +623,10 @@ function getMaster(){
 let whipBuffer = null, popBuffer = null;
 const WHIP_OFFSET = 0.20;   // ﾊﾟｧｰﾝ：頭の無音をスキップ
 const POP_OFFSET  = 0.10;   // ﾌﾟﾘ：頭の無音をスキップ
+let samplesPromise = null;
+
 function loadSamples(){
-  if (whipBuffer || popBuffer) return;
+  if (samplesPromise) return samplesPromise;
   async function load(b64, set){
     try{
       const res = await fetch("data:audio/mp3;base64," + b64);
@@ -633,8 +635,13 @@ function loadSamples(){
       set(audioBuf);
     }catch(e){}   // 失敗時は合成音にフォールバック
   }
-  if(typeof WHIP_B64 !== "undefined") load(WHIP_B64, b => { whipBuffer = b; });
-  if(typeof POP_B64  !== "undefined") load(POP_B64,  b => { popBuffer  = b; });
+  samplesPromise = (async () => {
+    const promises = [];
+    if(typeof WHIP_B64 !== "undefined") promises.push(load(WHIP_B64, b => { whipBuffer = b; }));
+    if(typeof POP_B64  !== "undefined") promises.push(load(POP_B64,  b => { popBuffer  = b; }));
+    await Promise.all(promises).catch(()=>{});
+  })();
+  return samplesPromise;
 }
 // お尻を叩く音を時刻 t に鳴らす
 //   "dot"=ﾌﾟﾘ → かわいく「ちょん♡」と触れる音
@@ -653,43 +660,7 @@ function hit(ctx, t, dur, type, out){
       src.connect(g); g.connect(dest);
       src.start(t, WHIP_OFFSET);
       src.stop(t + 0.8);
-      return;
     }
-    /* ===== ﾊﾟｧｰﾝ（合成フォールバック）：本気の平手打ち（破裂音） ===== */
-    // 1) インパクトのクラック（高域ノイズの瞬発）＝「パチッ！」
-    const cd = 0.10;
-    const nb = ctx.createBuffer(1, Math.ceil(ctx.sampleRate*cd), ctx.sampleRate);
-    const nd = nb.getChannelData(0);
-    for(let i=0;i<nd.length;i++) nd[i] = (Math.random()*2-1);
-    const crack = ctx.createBufferSource(); crack.buffer = nb;
-    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 1500; hp.Q.value = 0.7;
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(1.3, t);
-    cg.gain.exponentialRampToValueAtTime(0.001, t+cd);
-    crack.connect(hp); hp.connect(cg); cg.connect(dest);
-    crack.start(t); crack.stop(t+cd+0.02);
-
-    // 2) 肉を打つ低いボディ＝「バチッ」のドスッ
-    const body = ctx.createOscillator(); body.type = "triangle";
-    body.frequency.setValueAtTime(200, t);
-    body.frequency.exponentialRampToValueAtTime(70, t+0.12);
-    const bgn = ctx.createGain();
-    bgn.gain.setValueAtTime(1.0, t+0.001);
-    bgn.gain.exponentialRampToValueAtTime(0.001, t+0.14);
-    body.connect(bgn); bgn.connect(dest);
-    body.start(t); body.stop(t+0.16);
-
-    // 3) 「ーン」の余韻（部屋に響く感じ）
-    const ring = ctx.createOscillator(); ring.type = "sine";
-    ring.frequency.setValueAtTime(260, t);
-    ring.frequency.exponentialRampToValueAtTime(170, t+dur);
-    const rg = ctx.createGain();
-    rg.gain.setValueAtTime(0.0001, t);
-    rg.gain.linearRampToValueAtTime(0.28, t+0.02);
-    rg.gain.exponentialRampToValueAtTime(0.0005, t+dur);
-    ring.connect(rg); rg.connect(dest);
-    ring.start(t); ring.stop(t+dur+0.03);
-
   } else {
     // 実録サンプルがあれば、それを再生（ﾌﾟﾘ：頭の無音を飛ばし、毎回少し揺らす）
     if(popBuffer){
@@ -701,34 +672,7 @@ function hit(ctx, t, dur, type, out){
       src.connect(g); g.connect(dest);
       src.start(t, POP_OFFSET);
       src.stop(t + 0.5);
-      return;
     }
-    /* ===== ﾌﾟﾘ（合成フォールバック）：かわいく「ちょん♡」 ===== */
-    // まるい高めの「ぷりっ」ブリップ（三角波で柔らかく）
-    const o = ctx.createOscillator(); o.type = "triangle";
-    o.frequency.setValueAtTime(540, t);
-    o.frequency.exponentialRampToValueAtTime(900, t+0.05);
-    o.frequency.exponentialRampToValueAtTime(680, t+dur);
-    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3500;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.42, t+0.008);
-    g.gain.exponentialRampToValueAtTime(0.0006, t+dur);
-    o.connect(lp); lp.connect(g); g.connect(dest);
-    o.start(t); o.stop(t+dur+0.02);
-
-    // ちいさな「ぷ」の子音ティック
-    const td = 0.02;
-    const tn = ctx.createBuffer(1, Math.ceil(ctx.sampleRate*td), ctx.sampleRate);
-    const tdat = tn.getChannelData(0);
-    for(let i=0;i<tdat.length;i++) tdat[i] = (Math.random()*2-1);
-    const tick = ctx.createBufferSource(); tick.buffer = tn;
-    const tbp = ctx.createBiquadFilter(); tbp.type = "bandpass"; tbp.frequency.value = 2200; tbp.Q.value = 1;
-    const tg = ctx.createGain();
-    tg.gain.setValueAtTime(0.22, t);
-    tg.gain.exponentialRampToValueAtTime(0.001, t+td);
-    tick.connect(tbp); tbp.connect(tg); tg.connect(dest);
-    tick.start(t); tick.stop(t+td+0.02);
   }
 }
 
@@ -748,10 +692,11 @@ function stopPlay(){
 }
 
 // おしりモールス文字列をモールスのリズムで再生
-function playOshiri(text, btn){
+async function playOshiri(text, btn){
   if(!text.trim()) return;
   const ctx = getCtx();
-  if(ctx.state === "suspended") ctx.resume();
+  if(ctx.state === "suspended") await ctx.resume();
+  if(samplesPromise) await samplesPromise; // 音源ロード完了を待つ
   const bus = ctx.createGain(); bus.connect(getMaster());   // このセッション専用の出力バス
   const DOT_D=0.12, DASH_D=0.34, INTRA=0.06, LETTER=0.26, WORD=0.6;
   text = text.replace(VS_RE, "");   // 貼り付け文字列の異体字セレクタを除去
@@ -823,14 +768,15 @@ function puffThrottled(el){
 }
 let lastPoke = 0;
 // 🍑 をつつくと震えて、ペチッ＋「ﾌﾟﾘｯ」を1発（たまにバチーン）
-function poke(el){
+async function poke(el){
   const now = Date.now();
   if(now - lastPoke < 100) return;   // 100ms以内の連打は無視
   lastPoke = now;
+  const ctx = getCtx();
+  if(ctx.state==="suspended") await ctx.resume();
+  if(samplesPromise) await samplesPromise;
   el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle");
   puffFrom(el, 2);
-  const ctx = getCtx();
-  if(ctx.state==="suspended") ctx.resume();
   hit(ctx, ctx.currentTime+0.02, Math.random()<0.2?0.34:0.12, Math.random()<0.2?"dash":"dot");
 }
 
@@ -893,6 +839,22 @@ function requestDict(){
 }
 
 requestDict();
+
+// ユーザーが初めて画面に触れた際、事前にAudioContextをアンロックして音源ロードを開始する
+function unlockAndPreload() {
+  const ctx = getCtx();
+  if(ctx.state === "suspended") {
+    ctx.resume().then(clean);
+  } else {
+    clean();
+  }
+  function clean() {
+    window.removeEventListener("touchstart", unlockAndPreload);
+    window.removeEventListener("click", unlockAndPreload);
+  }
+}
+window.addEventListener("touchstart", unlockAndPreload, { passive: true });
+window.addEventListener("click", unlockAndPreload, { passive: true });
 </script>
 </body>
 </html>
