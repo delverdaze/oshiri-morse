@@ -611,6 +611,18 @@ function resumeAudio(){
     return audioCtx.resume().catch(()=>{});
   }
 }
+// iOS Safari ではバックグラウンド復帰後、resume() で state は "running" に戻っても
+// 実際には音が出なくなる（リロードで直る）。そこでコンテキストごと破棄し、
+// 次の再生（ユーザー操作）で作り直す。マスター・サンプルも作り直す必要があるため null に戻す。
+function teardownAudio(){
+  try{ if(typeof stopPlay === "function") stopPlay(); }catch(e){}
+  if(audioCtx){ try{ audioCtx.close(); }catch(e){} }
+  audioCtx = null;
+  master = null;
+  whipBuffer = null;
+  popBuffer = null;
+  samplesPromise = null;
+}
 // マスター：コンプ＋ゲイン（パンチを保ちつつ歪みすぎを防ぐ）
 let master = null;
 function getMaster(){
@@ -795,10 +807,10 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); }
 document.getElementById("enc-in").addEventListener("input", runEncode);
 document.getElementById("dec-in").addEventListener("input", runDecode);
 
-// バックグラウンドから復帰したら音声を再開（モバイルで戻ると音が出なくなる対策）
-document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") resumeAudio(); });
-window.addEventListener("pageshow", resumeAudio);
-window.addEventListener("focus", resumeAudio);
+// バックグラウンドに入ったらAudioContextを破棄（iOSで復帰後に音が死ぬ問題対策）。
+// 復帰後は次の再生操作（ユーザー操作）で getCtx() が新しいコンテキストを作り直す。
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") teardownAudio(); });
+window.addEventListener("pagehide", teardownAudio);
 
 /* ---- 漢字辞書（kuromoji）のロード：ページ表示後に非同期で取得 ---- */
 function failDict(){
