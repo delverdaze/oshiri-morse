@@ -604,6 +604,13 @@ function getCtx(){
   }
   return audioCtx;
 }
+// バックグラウンド復帰後など、AudioContextが止まっていたら再開する。
+// iOSでは "suspended" ではなく "interrupted" になることがあるため、running 以外を対象にする。
+function resumeAudio(){
+  if(audioCtx && audioCtx.state !== "running"){
+    return audioCtx.resume().catch(()=>{});
+  }
+}
 // マスター：コンプ＋ゲイン（パンチを保ちつつ歪みすぎを防ぐ）
 let master = null;
 function getMaster(){
@@ -695,7 +702,7 @@ function stopPlay(){
 async function playOshiri(text, btn){
   if(!text.trim()) return;
   const ctx = getCtx();
-  if(ctx.state === "suspended") await ctx.resume();
+  await resumeAudio();
   if(samplesPromise) await samplesPromise; // 音源ロード完了を待つ
   const bus = ctx.createGain(); bus.connect(getMaster());   // このセッション専用の出力バス
   const DOT_D=0.12, DASH_D=0.34, INTRA=0.06, LETTER=0.26, WORD=0.6;
@@ -773,7 +780,7 @@ async function poke(el){
   if(now - lastPoke < 100) return;   // 100ms以内の連打は無視
   lastPoke = now;
   const ctx = getCtx();
-  if(ctx.state==="suspended") await ctx.resume();
+  await resumeAudio();
   if(samplesPromise) await samplesPromise;
   el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle");
   puffFrom(el, 2);
@@ -787,6 +794,11 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); }
 
 document.getElementById("enc-in").addEventListener("input", runEncode);
 document.getElementById("dec-in").addEventListener("input", runDecode);
+
+// バックグラウンドから復帰したら音声を再開（モバイルで戻ると音が出なくなる対策）
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") resumeAudio(); });
+window.addEventListener("pageshow", resumeAudio);
+window.addEventListener("focus", resumeAudio);
 
 /* ---- 漢字辞書（kuromoji）のロード：ページ表示後に非同期で取得 ---- */
 function failDict(){
