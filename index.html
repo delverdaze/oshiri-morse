@@ -895,18 +895,16 @@ function requestDict(){
 
 requestDict();
 
-// ユーザーが初めて画面に触れた際、事前にAudioContextをアンロックして音源ロードを開始する
-function unlockAndPreload() {
-  const ctx = getCtx();
-  const generation = audioGeneration;
-  resumeAudio(ctx).then((resumed)=>{ if(resumed && isCurrentCtx(ctx, generation)) clean(); });
-  function clean() {
-    window.removeEventListener("touchstart", unlockAndPreload);
-    window.removeEventListener("click", unlockAndPreload);
-  }
+// ユーザーが初めて画面に触れた際、音源のデコードだけ先に始めておく（再生時の待ちを減らす）。
+// decodeAudioData は suspended のままでも動くため、ここでは resume しない。
+// 実際の出力アンロックは、再生ボタン側（非passiveのonclick）の unlockKick が担う。
+function preloadAudio() {
+  getCtx();   // AudioContext生成 → loadSamples() で音源デコード開始
+  window.removeEventListener("touchstart", preloadAudio);
+  window.removeEventListener("click", preloadAudio);
 }
-window.addEventListener("touchstart", unlockAndPreload, { passive: true });
-window.addEventListener("click", unlockAndPreload, { passive: true });
+window.addEventListener("touchstart", preloadAudio, { passive: true });
+window.addEventListener("click", preloadAudio, { passive: true });
 </script>
 </body>
 </html>
