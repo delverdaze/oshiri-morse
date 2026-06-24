@@ -617,6 +617,18 @@ function resumeAudio(ctx){
     .then(()=>ctx === audioCtx && ctx.state === "running")
     .catch(()=>false);
 }
+// iOS Safari は resume() だけでは音が出ない（state は running になるのに無音）。
+// ユーザー操作中（await より前・同期的）に無音バッファを start() して、
+// 出力経路を確実にアンロックする。新規/復帰したコンテキストの初回発音に必須。
+function unlockKick(ctx){
+  try{
+    ctx.resume();
+    const src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, 22050);
+    src.connect(ctx.destination);
+    src.start(0);
+  }catch(e){}
+}
 // iOS Safari ではバックグラウンド復帰後、resume() で state は "running" に戻っても
 // 実際には音が出なくなる（リロードで直る）。そこでコンテキストごと破棄し、
 // 次の再生（ユーザー操作）で作り直す。マスター・サンプルも作り直す必要があるため null に戻す。
@@ -726,6 +738,7 @@ async function playOshiri(text, btn){
   if(!text.trim()) return;
   const ctx = getCtx();
   const generation = audioGeneration;
+  unlockKick(ctx);   // ジェスチャー内で出力をアンロック（await より前に同期実行）
   if(!await resumeAudio(ctx) || !isCurrentCtx(ctx, generation)) return;
   const loading = samplesPromise;
   if(loading) await loading; // 音源ロード完了を待つ
@@ -807,6 +820,7 @@ async function poke(el){
   lastPoke = now;
   const ctx = getCtx();
   const generation = audioGeneration;
+  unlockKick(ctx);   // ジェスチャー内で出力をアンロック（await より前に同期実行）
   if(!await resumeAudio(ctx) || !isCurrentCtx(ctx, generation)) return;
   const loading = samplesPromise;
   if(loading) await loading;
