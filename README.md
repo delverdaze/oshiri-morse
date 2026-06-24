@@ -12,7 +12,7 @@
 
 `🔊 おしりで聞く` ボタンを押すと、モールスのリズムに合わせて
 **かわいい「ﾌﾟﾘ」と本気の「ﾊﾟｧｰﾝ」のギャップ**を音で楽しめます。
-「ﾌﾟﾘ」と「ﾊﾟｧｰﾝ」には base64 で内蔵した効果音を使い、内蔵音源を読み込めない場合は Web Audio の合成音にフォールバックします。
+「ﾌﾟﾘ」と「ﾊﾟｧｰﾝ」には base64 で内蔵した効果音を使います。
 
 例：「おしり」→ `ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ`
 
@@ -100,7 +100,7 @@
 >
 > Sound Effect by [Universfield](https://pixabay.com/ja/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342) from [Pixabay](https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342)
 
-※ 効果音は base64 で `index.html` に内蔵しています。内蔵音源を読み込めない場合は、Web Audio の合成音にフォールバックします。
+※ 効果音は base64 で `index.html` に内蔵しています。
 
 ---
 

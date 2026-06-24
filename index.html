@@ -597,43 +597,53 @@ async function copyOut(id, noteId){
 
 /* ===== 🔊 お尻ペチペチ音エンジン（Web Audio・音源ファイル不要） ===== */
 let audioCtx = null;
+let audioGeneration = 0;
 function getCtx(){
   if(!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    loadSamples();
+    loadSamples(audioCtx, audioGeneration);
   }
   return audioCtx;
 }
+function isCurrentCtx(ctx, generation){
+  return audioCtx === ctx && audioGeneration === generation && ctx.state !== "closed";
+}
 // バックグラウンド復帰後など、AudioContextが止まっていたら再開する。
 // iOSでは "suspended" ではなく "interrupted" になることがあるため、running 以外を対象にする。
-function resumeAudio(){
-  if(audioCtx && audioCtx.state !== "running"){
-    return audioCtx.resume().catch(()=>{});
-  }
+function resumeAudio(ctx){
+  if(!ctx || ctx !== audioCtx || ctx.state === "closed") return Promise.resolve(false);
+  if(ctx.state === "running") return Promise.resolve(true);
+  return ctx.resume()
+    .then(()=>ctx === audioCtx && ctx.state === "running")
+    .catch(()=>false);
 }
 // iOS Safari ではバックグラウンド復帰後、resume() で state は "running" に戻っても
 // 実際には音が出なくなる（リロードで直る）。そこでコンテキストごと破棄し、
 // 次の再生（ユーザー操作）で作り直す。マスター・サンプルも作り直す必要があるため null に戻す。
 function teardownAudio(){
   try{ if(typeof stopPlay === "function") stopPlay(); }catch(e){}
-  if(audioCtx){ try{ audioCtx.close(); }catch(e){} }
+  const ctx = audioCtx;
+  audioGeneration++;
   audioCtx = null;
   master = null;
+  masterCtx = null;
   whipBuffer = null;
   popBuffer = null;
   samplesPromise = null;
+  if(ctx){ try{ void ctx.close().catch(()=>{}); }catch(e){} }
 }
 // マスター：コンプ＋ゲイン（パンチを保ちつつ歪みすぎを防ぐ）
 let master = null;
-function getMaster(){
-  const ctx = getCtx();
-  if(!master){
+let masterCtx = null;
+function getMaster(ctx){
+  if(masterCtx !== ctx){
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14; comp.knee.value = 6;
     comp.ratio.value = 5; comp.attack.value = 0.002; comp.release.value = 0.12;
     const mg = ctx.createGain(); mg.gain.value = 1.0;
     comp.connect(mg); mg.connect(ctx.destination);
     master = comp;
+    masterCtx = ctx;
   }
   return master;
 }
@@ -644,15 +654,16 @@ const WHIP_OFFSET = 0.20;   // ﾊﾟｧｰﾝ：頭の無音をスキップ
 const POP_OFFSET  = 0.10;   // ﾌﾟﾘ：頭の無音をスキップ
 let samplesPromise = null;
 
-function loadSamples(){
+function loadSamples(ctx, generation){
   if (samplesPromise) return samplesPromise;
   async function load(b64, set){
     try{
       const res = await fetch("data:audio/mp3;base64," + b64);
       const buf = await res.arrayBuffer();
-      const audioBuf = await getCtx().decodeAudioData(buf);
-      set(audioBuf);
-    }catch(e){}   // 失敗時は合成音にフォールバック
+      if(!isCurrentCtx(ctx, generation)) return;
+      const audioBuf = await ctx.decodeAudioData(buf);
+      if(isCurrentCtx(ctx, generation)) set(audioBuf);
+    }catch(e){}   // 読み込めなかった音源は再生しない
   }
   samplesPromise = (async () => {
     const promises = [];
@@ -666,7 +677,7 @@ function loadSamples(){
 //   "dot"=ﾌﾟﾘ → かわいく「ちょん♡」と触れる音
 //   "dash"=ﾊﾟｧｰﾝ → 思いっきり叩く破裂音「バチーン！」
 function hit(ctx, t, dur, type, out){
-  const dest = out || getMaster();
+  const dest = out || getMaster(ctx);
 
   if(type === "dash"){
     // 実録サンプルがあれば、それを再生（頭の無音を飛ばし、毎回少し揺らす）
@@ -714,9 +725,12 @@ function stopPlay(){
 async function playOshiri(text, btn){
   if(!text.trim()) return;
   const ctx = getCtx();
-  await resumeAudio();
-  if(samplesPromise) await samplesPromise; // 音源ロード完了を待つ
-  const bus = ctx.createGain(); bus.connect(getMaster());   // このセッション専用の出力バス
+  const generation = audioGeneration;
+  if(!await resumeAudio(ctx) || !isCurrentCtx(ctx, generation)) return;
+  const loading = samplesPromise;
+  if(loading) await loading; // 音源ロード完了を待つ
+  if(!isCurrentCtx(ctx, generation) || ctx.state !== "running") return;
+  const bus = ctx.createGain(); bus.connect(getMaster(ctx));   // このセッション専用の出力バス
   const DOT_D=0.12, DASH_D=0.34, INTRA=0.06, LETTER=0.26, WORD=0.6;
   text = text.replace(VS_RE, "");   // 貼り付け文字列の異体字セレクタを除去
   let t = ctx.currentTime + 0.06;
@@ -792,8 +806,11 @@ async function poke(el){
   if(now - lastPoke < 100) return;   // 100ms以内の連打は無視
   lastPoke = now;
   const ctx = getCtx();
-  await resumeAudio();
-  if(samplesPromise) await samplesPromise;
+  const generation = audioGeneration;
+  if(!await resumeAudio(ctx) || !isCurrentCtx(ctx, generation)) return;
+  const loading = samplesPromise;
+  if(loading) await loading;
+  if(!isCurrentCtx(ctx, generation) || ctx.state !== "running") return;
   el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle");
   puffFrom(el, 2);
   hit(ctx, ctx.currentTime+0.02, Math.random()<0.2?0.34:0.12, Math.random()<0.2?"dash":"dot");
@@ -867,11 +884,8 @@ requestDict();
 // ユーザーが初めて画面に触れた際、事前にAudioContextをアンロックして音源ロードを開始する
 function unlockAndPreload() {
   const ctx = getCtx();
-  if(ctx.state === "suspended") {
-    ctx.resume().then(clean);
-  } else {
-    clean();
-  }
+  const generation = audioGeneration;
+  resumeAudio(ctx).then((resumed)=>{ if(resumed && isCurrentCtx(ctx, generation)) clean(); });
   function clean() {
     window.removeEventListener("touchstart", unlockAndPreload);
     window.removeEventListener("click", unlockAndPreload);
