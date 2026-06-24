@@ -19,7 +19,6 @@
 <meta name="twitter:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
 <title>🍑 おしりモールス変換器</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E🍑%3C/text%3E%3C/svg%3E">
-<script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
 <style>
   :root{
     --peach:#ff9aa2;
@@ -133,11 +132,19 @@
   .x-post-preview-text{display:block;max-height:8.2em;overflow:auto;white-space:pre-wrap;word-break:break-all;}
   .x-post-preview .overflow{color:#c53030;background:#ffe1e1;font-weight:700;}
   .samples{margin-top:14px;font-size:.82rem;color:var(--ink-soft);}
-  .samples a{color:var(--accent);cursor:pointer;text-decoration:underline dotted;margin-right:12px;}
+  .samples button{
+    padding:0;border:0;background:none;color:var(--accent);font:inherit;
+    cursor:pointer;text-decoration:underline dotted;margin-right:12px;
+  }
+  .samples button:hover,.samples button:focus-visible{opacity:.8;}
+  .samples button:focus-visible{outline:2px solid var(--peach-deep);outline-offset:3px;border-radius:2px;}
   footer{text-align:center;color:var(--ink-soft);font-size:.78rem;margin-top:30px;line-height:1.8;}
   footer a{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent);}
   footer a:hover{opacity:.8;}
-  .credit-link{cursor:pointer;color:var(--accent);border-bottom:1px dotted var(--accent);display:inline-block;margin-top:4px;}
+  .credit-link{
+    cursor:pointer;color:var(--accent);border:0;border-bottom:1px dotted var(--accent);
+    background:none;padding:0;font:inherit;display:inline-block;margin-top:4px;
+  }
   .credit-link:hover{opacity:.8;}
   /* クレジットモーダル */
   .modal-overlay{
@@ -186,14 +193,14 @@
   <div class="card">
     <!-- ENCODE -->
     <div id="panel-enc">
-      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）</div>
+      <div class="dict-status" id="dict-status">📖 漢字を入力すると、読み辞書を読み込みます（ひらがな・カタカナはすぐ使えます）</div>
       <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
       <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
       <div class="samples">
         例文：
-        <a onclick="sample('おしり')">おしり</a>
-        <a onclick="sample('大好き')">大好き</a>
-        <a onclick="sample('ソフトタッチ')">ソフトタッチ</a>
+        <button type="button" onclick="sample('おしり')">おしり</button>
+        <button type="button" onclick="sample('大好き')">大好き</button>
+        <button type="button" onclick="sample('ソフトタッチ')">ソフトタッチ</button>
       </div>
       <div class="arrow">⬇️ よみがな</div>
       <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
@@ -232,7 +239,7 @@
 
   <footer>
     変換はすべてブラウザ内で完結（送信なし）。<br>
-    <a class="credit-link" onclick="openCredits()">クレジット・謝辞 🍑</a>
+    <button type="button" class="credit-link" onclick="openCredits()">クレジット・謝辞 🍑</button>
   </footer>
 
   <!-- クレジットモーダル -->
@@ -313,6 +320,9 @@ function morseToOshiri(m){
 
 /* ---- 漢字 → 読み（かな）：kuromoji.js による形態素解析 ---- */
 let tokenizer = null;   // 辞書ロード完了でセットされる
+let dictState = "idle";
+let dictTimer = null;
+const KANJI_RE = /[\u3400-\u9FFF\uF900-\uFAFF]/;
 function wordToKana(word){
   if(!tokenizer) return word;            // 辞書未ロード時は素通り（かなはそのまま使える）
   try{
@@ -401,6 +411,15 @@ function runEncode(){
     document.getElementById("enc-yomi").value="";
     updateXPostCounter("");
     note.textContent="";
+    return;
+  }
+  if(KANJI_RE.test(v) && !tokenizer && dictState !== "failed"){
+    requestDict();
+    document.getElementById("enc-out").value="";
+    document.getElementById("enc-yomi").value="";
+    updateXPostCounter("");
+    note.className = "note";
+    note.textContent = "📖 漢字の読みを準備中…（完了すると自動で変換します）";
     return;
   }
   document.getElementById("enc-yomi").value = toHiraReading(v);
@@ -739,27 +758,51 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); }
 document.getElementById("enc-in").addEventListener("input", runEncode);
 document.getElementById("dec-in").addEventListener("input", runDecode);
 
-/* ---- 漢字辞書（kuromoji）のロード ---- */
-(function loadDict(){
+/* ---- 漢字辞書（kuromoji）のロード：漢字入力時にだけ非同期で取得 ---- */
+function failDict(){
   const status = document.getElementById("dict-status");
-  if(typeof kuromoji === "undefined"){
-    status.className = "dict-status fail";
-    status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
-    return;
-  }
-  kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" })
-    .build(function(err, tk){
-      if(err){
-        status.className = "dict-status fail";
-        status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
-        return;
-      }
-      tokenizer = tk;
-      status.className = "dict-status ready";
-      status.textContent = "✅ 漢字のままでOK（読みをひらがなにしてから変換します）";
-      runEncode();   // 既に入力済みなら再変換
-    });
-})();
+  if(dictTimer) clearTimeout(dictTimer);
+  dictState = "failed";
+  status.className = "dict-status fail";
+  status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
+  runEncode();
+}
+
+function buildTokenizer(){
+  if(dictState !== "loading") return;
+  if(typeof kuromoji === "undefined"){ failDict(); return; }
+  try{
+    kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" })
+      .build(function(err, tk){
+        if(dictState !== "loading") return;
+        if(err){ failDict(); return; }
+        if(dictTimer) clearTimeout(dictTimer);
+        tokenizer = tk;
+        dictState = "ready";
+        const status = document.getElementById("dict-status");
+        status.className = "dict-status ready";
+        status.textContent = "✅ 漢字のままでOK（読みをひらがなにしてから変換します）";
+        runEncode();
+      });
+  }catch(e){ failDict(); }
+}
+
+function requestDict(){
+  if(dictState !== "idle") return;
+  dictState = "loading";
+  const status = document.getElementById("dict-status");
+  status.className = "dict-status loading";
+  status.textContent = "📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）";
+  const script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js";
+  script.async = true;
+  script.onload = buildTokenizer;
+  script.onerror = failDict;
+  document.head.appendChild(script);
+  dictTimer = setTimeout(function(){
+    if(dictState === "loading") failDict();
+  }, 15000);
+}
 </script>
 </body>
 </html>
