@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="日本語を「お尻を叩く音」のモールス信号に変換・復元するツール。ﾊﾟｧｰﾝｯ‼︎（バチーン）と ﾌﾟﾘｯ（ちょん♡）で秘密のメッセージを。">
+<!-- OGP / Twitter Card -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://delverdaze.github.io/oshiri-morse/">
+<meta property="og:title" content="🍑 おしりモールス変換器">
+<meta property="og:description" content="日本語を「お尻を叩く音」のモールス信号（ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ）に変換・復元。SNSでこっそり伝えよう。">
+<meta property="og:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🍑 おしりモールス変換器">
+<meta name="twitter:description" content="日本語を「お尻を叩く音」のモールス信号（ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ）に変換・復元。SNSでこっそり伝えよう。">
+<meta name="twitter:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
 <title>🍑 おしりモールス変換器</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E🍑%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
@@ -107,6 +120,18 @@
 
   .note{font-size:.82rem;color:var(--warn);margin-top:10px;min-height:1.1em;}
   .note.ok{color:var(--good);}
+  .x-post-status{
+    margin-top:10px;padding:9px 12px;border:1px solid #bfe8cf;border-radius:10px;
+    background:#eefaf2;color:var(--good);font-size:.82rem;font-weight:700;
+  }
+  .x-post-status.over{background:#fdeee9;border-color:#f6cdbd;color:var(--warn);}
+  .x-post-preview{
+    margin-top:8px;padding:10px 12px;border:1px solid #f6cdbd;border-radius:10px;
+    background:#fffafb;color:var(--ink-soft);font-size:.8rem;line-height:1.65;
+  }
+  .x-post-preview-label{display:block;margin-bottom:4px;font-weight:700;color:var(--warn);}
+  .x-post-preview-text{display:block;max-height:8.2em;overflow:auto;white-space:pre-wrap;word-break:break-all;}
+  .x-post-preview .overflow{color:#c53030;background:#ffe1e1;font-weight:700;}
   .samples{margin-top:14px;font-size:.82rem;color:var(--ink-soft);}
   .samples a{color:var(--accent);cursor:pointer;text-decoration:underline dotted;margin-right:12px;}
   footer{text-align:center;color:var(--ink-soft);font-size:.78rem;margin-top:30px;line-height:1.8;}
@@ -146,7 +171,7 @@
   <header>
     <span class="peachicon" id="peach" onclick="poke(this)" title="つついてみて">🍑</span>
     <h1>おしりモールス変換器</h1>
-    <p class="tagline">日本語を「お尻ペチペチ」のモールス信号に変換して、こっそり伝えよう。</p>
+    <p class="tagline">ことばにできない気持ちを、おしりに預けよう。</p>
     <div class="legend">
       <span>長点 <b>－</b> → <b>ﾊﾟｧｰﾝｯ‼︎</b></span>
       <span>短点 <b>・</b> → <b>ﾌﾟﾘｯ</b></span>
@@ -167,8 +192,8 @@
       <div class="samples">
         例文：
         <a onclick="sample('おしり')">おしり</a>
-        <a onclick="sample('好きです')">好きです</a>
-        <a onclick="sample('今日は良い天気')">今日は良い天気</a>
+        <a onclick="sample('大好き')">大好き</a>
+        <a onclick="sample('ソフトタッチ')">ソフトタッチ</a>
       </div>
       <div class="arrow">⬇️ よみがな</div>
       <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
@@ -177,6 +202,11 @@
       <label class="field-label" for="enc-out">おしりモールス（SNSにコピペ）</label>
       <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
       <div class="note ok" id="enc-note"></div>
+      <div class="x-post-status" id="enc-x-status" aria-live="polite">𝕏 投稿：0 / 280 文字</div>
+      <div class="x-post-preview" id="enc-x-preview" hidden>
+        <span class="x-post-preview-label">投稿できない超過分（赤）</span>
+        <span class="x-post-preview-text" id="enc-x-preview-text"></span>
+      </div>
       <div class="btnrow">
         <button class="act btn-primary" onclick="copyOut('enc-out','enc-note')">📋 コピー</button>
         <button class="act btn-listen" id="enc-listen" onclick="listen('enc-out','enc-listen')">🔊 おしりで聞く</button>
@@ -201,8 +231,7 @@
   </div>
 
   <footer>
-    和文モールス符号ベース／変換はすべてブラウザ内で完結（送信なし）。<br>
-    対応：ひらがな・カタカナ・濁点・半濁点・長音「ー」・「、」「。」。スペースは単語区切り「／」になります。<br>
+    変換はすべてブラウザ内で完結（送信なし）。<br>
     <a class="credit-link" onclick="openCredits()">クレジット・謝辞 🍑</a>
   </footer>
 
@@ -218,7 +247,7 @@
           「おしりモールス信号」にインスパイアされて作りました🙏
         </dd>
         <dt>開発</dt>
-        <dd><a href="https://github.com/delverdaze" target="_blank" rel="noopener">@delverdaze</a></dd>
+        <dd><a href="https://x.com/delverdaze" target="_blank" rel="noopener">@delverdaze</a></dd>
         <dt>効果音</dt>
         <dd>
           Sound Effect by <a href="https://pixabay.com/ja/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123738" target="_blank" rel="noopener">Universfield</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123738" target="_blank" rel="noopener">Pixabay</a><br>
@@ -235,6 +264,12 @@ const POP_B64="//vURAAM5Id1oggvT7CALqRiDCyeVc3YviKx/sKRupfAgT7pAL/gMk0/zIxIAy//p
 /* ===== おしりモールス 変換コア ===== */
 const DASH = "ﾊﾟｧｰﾝｯ‼︎";   // 長点 －
 const DOT  = "ﾌﾟﾘｯ";        // 短点 ・
+// SNS投稿で異体字セレクタ(U+FE0E/FE0F)が剥がれる/絵文字化することがあるため、
+// 解読・再生時は VS を除去した形で照合して堅牢にする（エンコード出力は不変）
+const VS_RE  = /[\uFE0E\uFE0F]/g;   // 異体字セレクタ(FE0E/FE0F)を除去
+const DASH_N = DASH.replace(VS_RE, "");
+const DOT_N  = DOT.replace(VS_RE, "");
+const X_POST_LIMIT = 280;
 
 // 和文モールス符号（・=. －=- で保持）
 const H2M = {
@@ -325,6 +360,7 @@ function encode(input){
 /* ---- デコード：おしりモールス → 日本語 ---- */
 function decode(input){
   const bad = [];
+  input = input.replace(VS_RE, "");   // 異体字セレクタを除去して照合を堅牢に
   const words = input.split("／");
   const outWords = words.map(word=>{
     const units = word.split(/[\s　]+/).filter(Boolean);
@@ -332,8 +368,8 @@ function decode(input){
     for(const u of units){
       let m = "", i = 0;
       while(i < u.length){
-        if(u.startsWith(DASH, i)){ m += "-"; i += DASH.length; }
-        else if(u.startsWith(DOT, i)){ m += "."; i += DOT.length; }
+        if(u.startsWith(DASH_N, i)){ m += "-"; i += DASH_N.length; }
+        else if(u.startsWith(DOT_N, i)){ m += "."; i += DOT_N.length; }
         else { i++; }   // 余計な文字はスキップ
       }
       if(m === "") continue;
@@ -360,17 +396,68 @@ function setMode(m){
 function runEncode(){
   const v = document.getElementById("enc-in").value;
   const note = document.getElementById("enc-note");
-  if(!v.trim()){ document.getElementById("enc-out").value=""; document.getElementById("enc-yomi").value=""; note.textContent=""; return; }
+  if(!v.trim()){
+    document.getElementById("enc-out").value="";
+    document.getElementById("enc-yomi").value="";
+    updateXPostCounter("");
+    note.textContent="";
+    return;
+  }
   document.getElementById("enc-yomi").value = toHiraReading(v);
   const r = encode(v);
   const outEl = document.getElementById("enc-out");
   const changed = outEl.value !== r.text;
   outEl.value = r.text;
+  updateXPostCounter(r.text);
   if(changed && r.text) puffThrottled(outEl);
   if(r.unknown.length){
     note.className = "note";
     note.textContent = "⚠️ 変換できない文字：" + r.unknown.join(" ") + "（ひらがな・カタカナのみ対応）";
-  } else { note.className="note ok"; note.textContent="✅ 変換できました"; }
+  } else { note.className="note ok"; note.textContent="✅ おしり化、完了。"; }
+}
+
+// X は Unicode の範囲ごとに 1 / 2 文字として数える。変換結果には URL が含まれないため、
+// X の公式 twitter-text 設定（v3）の重みをそのまま使う。
+function xCharacterWeight(ch){
+  const cp = ch.codePointAt(0);
+  return (cp <= 0x10FF ||
+    (cp >= 0x2000 && cp <= 0x200D) ||
+    (cp >= 0x2010 && cp <= 0x201F) ||
+    (cp >= 0x2032 && cp <= 0x2037)) ? 1 : 2;
+}
+function measureXPost(text){
+  const normalized = text.normalize("NFC");
+  let length = 0, validEnd = 0, i = 0;
+  for(const ch of normalized){
+    const weight = xCharacterWeight(ch);
+    if(length + weight <= X_POST_LIMIT) validEnd = i + ch.length;
+    length += weight;
+    i += ch.length;
+  }
+  return { length, validEnd };
+}
+function updateXPostCounter(text){
+  const status = document.getElementById("enc-x-status");
+  const preview = document.getElementById("enc-x-preview");
+  const previewText = document.getElementById("enc-x-preview-text");
+  const measured = measureXPost(text);
+  const overflow = measured.length - X_POST_LIMIT;
+  status.classList.toggle("over", overflow > 0);
+  if(overflow > 0){
+    status.textContent = "⚠️ おしりが𝕏の枠からはみ出しています（" + overflow + " 文字オーバー）";
+    preview.hidden = false;
+    previewText.replaceChildren();
+    const allowed = document.createElement("span");
+    allowed.textContent = text.slice(0, measured.validEnd);
+    const excess = document.createElement("span");
+    excess.className = "overflow";
+    excess.textContent = text.slice(measured.validEnd);
+    previewText.append(allowed, excess);
+  } else {
+    status.textContent = "𝕏 投稿：" + measured.length + " / " + X_POST_LIMIT + " 文字（残り " + (X_POST_LIMIT - measured.length) + "）";
+    preview.hidden = true;
+    previewText.replaceChildren();
+  }
 }
 function runDecode(){
   const v = document.getElementById("dec-in").value;
@@ -378,7 +465,10 @@ function runDecode(){
   if(!v.trim()){ document.getElementById("dec-out").value=""; note.textContent=""; return; }
   const r = decode(v);
   document.getElementById("dec-out").value = r.text;
-  if(r.bad.length){
+  if(r.text === ""){
+    note.className="note";
+    note.textContent = "⚠️ おしりモールスではありません。ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ を貼ってね。";
+  } else if(r.bad.length){
     note.className="note";
     note.textContent = "⚠️ 解読できない符号がありました（【?】部分）";
   } else { note.className="note ok"; note.textContent="✅ 復元できました"; }
@@ -389,6 +479,7 @@ function clearAll(m){
   document.getElementById(m+"-in").value="";
   document.getElementById(m+"-out").value="";
   if(m==="enc") document.getElementById("enc-yomi").value="";
+  if(m==="enc") updateXPostCounter("");
   document.getElementById(m+"-note").textContent="";
   document.getElementById(m+"-in").focus();
 }
@@ -564,13 +655,14 @@ function playOshiri(text, btn){
   if(ctx.state === "suspended") ctx.resume();
   const bus = ctx.createGain(); bus.connect(getMaster());   // このセッション専用の出力バス
   const DOT_D=0.12, DASH_D=0.34, INTRA=0.06, LETTER=0.26, WORD=0.6;
+  text = text.replace(VS_RE, "");   // 貼り付け文字列の異体字セレクタを除去
   let t = ctx.currentTime + 0.06;
   for(const word of text.split("／")){
     for(const u of word.split(/[\s　]+/).filter(Boolean)){
       let i=0;
       while(i<u.length){
-        if(u.startsWith(DASH,i)){ hit(ctx,t,DASH_D,"dash",bus); t+=DASH_D+INTRA; i+=DASH.length; }
-        else if(u.startsWith(DOT,i)){ hit(ctx,t,DOT_D,"dot",bus); t+=DOT_D+INTRA; i+=DOT.length; }
+        if(u.startsWith(DASH_N,i)){ hit(ctx,t,DASH_D,"dash",bus); t+=DASH_D+INTRA; i+=DASH_N.length; }
+        else if(u.startsWith(DOT_N,i)){ hit(ctx,t,DOT_D,"dot",bus); t+=DOT_D+INTRA; i+=DOT_N.length; }
         else { i++; }
       }
       t += LETTER;
@@ -664,7 +756,7 @@ document.getElementById("dec-in").addEventListener("input", runDecode);
       }
       tokenizer = tk;
       status.className = "dict-status ready";
-      status.textContent = "✅ 漢字対応OK（漢字混じりの文章もそのまま変換できます）";
+      status.textContent = "✅ 漢字のままでOK（読みをひらがなにしてから変換します）";
       runEncode();   // 既に入力済みなら再変換
     });
 })();

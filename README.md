@@ -34,6 +34,7 @@
 - 入力するたびに**リアルタイム変換**
 - **漢字混じりの日本語**もそのまま入力可能（読みに自動変換）
 - 送信前に読み方を確認できる **「読み（ひらがな）」プレビュー**
+- X投稿用の**280文字カウンター**（超過分を赤く表示）
 - すべて**ブラウザ内で完結**（入力テキストは外部に送信しません）
 - **単一 HTML ファイル**。`index.html` を開くだけ／GitHub Pages にそのまま置けます
 
@@ -101,6 +102,14 @@
 
 ---
 
+## 📄 ライセンス
+
+このリポジトリのソースコードは [MIT License](LICENSE) です。商用利用・改変・再配布を含めて自由に利用できます。再配布時は、LICENSE の著作権表示と許諾文を残してください。
+
+`index.html` に埋め込まれている Pixabay 提供の効果音は MIT License の対象外です。効果音の利用・再配布には、それぞれの [Pixabay Content License](https://pixabay.com/service/license-summary/) が適用されます。
+
+---
+
 ## 🚀 使い方
 
 ### ローカル
@@ -122,6 +131,7 @@ oshiri-morse/
 ├── index.html              # アプリ本体（HTML/CSS/JS 全部入り）
 ├── oshiri-morse-encode.md  # 原案ベースのエンコード仕様（プロンプト）
 ├── oshiri-morse-decode.md  # 原案ベースのデコード仕様（プロンプト）
+├── LICENSE                 # ソースコードの MIT License
 ├── README.md
 └── .gitignore
 ```
