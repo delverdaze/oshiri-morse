@@ -1,0 +1,42 @@
+# === OS ===
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# === エディタ / IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Node / npm（テスト・audit 等の開発生成物） ===
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# npm audit / 脆弱性レポートなどの出力
+audit.json
+audit-report.*
+*.audit
+report.*
+
+# === AI / エージェント系の作業ファイル ===
+.claude/
+.agents/
+AGENTS.md
+.aidlc/
+aidlc-docs/
+
+# === その他 ===
+.cache/
+tmp/
+*.tmp
+.env
+.env.*

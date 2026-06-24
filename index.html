@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="日本語をおしり（おなら）モールス信号に変換・復元するツール。ﾊﾟｧｰﾝｯ‼︎ と ﾌﾟﾘｯ で秘密のメッセージを。">
+<title>🍑 おしりモールス変換器</title>
+<script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
+<style>
+  :root{
+    --peach:#ff9aa2;
+    --peach-deep:#ff6f80;
+    --bg1:#fff0f3;
+    --bg2:#ffe0e6;
+    --card:#ffffff;
+    --ink:#43353a;
+    --ink-soft:#8a7077;
+    --line:#ffd2da;
+    --accent:#ff5773;
+    --good:#3aa66b;
+    --warn:#e0683a;
+    --shadow:0 10px 30px rgba(255,111,128,.25);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    min-height:100vh;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:680px;margin:0 auto;}
+  header{text-align:center;margin:8px 0 22px;}
+  h1{font-size:1.7rem;margin:0;letter-spacing:.02em;}
+  .peachicon{font-size:2.4rem;display:block;line-height:1;margin-bottom:6px;}
+  .tagline{color:var(--ink-soft);font-size:.9rem;margin-top:8px;}
+  .legend{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;
+  }
+  .legend span{
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:6px 12px;font-size:.82rem;box-shadow:var(--shadow);
+  }
+  .legend b{color:var(--accent);}
+
+  .tabs{display:flex;gap:8px;margin:24px 0 14px;}
+  .tab{
+    flex:1;padding:13px 8px;border:none;border-radius:14px 14px 0 0;
+    background:var(--bg2);color:var(--ink-soft);font-size:1rem;font-weight:700;
+    cursor:pointer;transition:.18s;border-bottom:3px solid transparent;
+  }
+  .tab.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow);border-bottom-color:var(--accent);}
+
+  .card{
+    background:var(--card);border-radius:0 0 18px 18px;border:1px solid var(--line);
+    border-top:none;padding:18px;box-shadow:var(--shadow);
+  }
+  .dict-status{
+    font-size:.82rem;border-radius:10px;padding:9px 12px;margin:0 0 14px;
+    border:1px solid var(--line);background:#fffafb;color:var(--ink-soft);
+  }
+  .dict-status.loading{background:#fff6e9;border-color:#ffe0b2;color:#a9772f;}
+  .dict-status.ready{background:#eefaf2;border-color:#bfe8cf;color:var(--good);}
+  .dict-status.fail{background:#fdeee9;border-color:#f6cdbd;color:var(--warn);}
+  label.field-label{display:block;font-size:.85rem;font-weight:700;margin:0 0 8px;color:var(--ink-soft);}
+  textarea{
+    width:100%;min-height:120px;resize:vertical;border:2px solid var(--line);
+    border-radius:12px;padding:14px;font-size:1.05rem;line-height:1.7;color:var(--ink);
+    font-family:inherit;background:#fffafb;transition:.15s;
+  }
+  textarea:focus{outline:none;border-color:var(--peach-deep);box-shadow:0 0 0 4px rgba(255,111,128,.15);}
+  textarea.out{background:#fff5f7;}
+  textarea.yomi{min-height:56px;background:#fffdf3;border-color:#ffe7b0;color:#7a6326;font-weight:600;letter-spacing:.03em;}
+
+  .arrow{text-align:center;font-size:1.5rem;color:var(--peach-deep);margin:12px 0 6px;}
+  .btnrow{display:flex;gap:10px;margin:14px 0 6px;flex-wrap:wrap;}
+  button.act{
+    flex:1;min-width:120px;border:none;border-radius:12px;padding:13px;
+    font-size:.98rem;font-weight:700;cursor:pointer;transition:.15s;
+  }
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:var(--shadow);}
+  .btn-primary:active{transform:translateY(1px);}
+  .btn-ghost{background:var(--bg2);color:var(--ink-soft);}
+  .btn-ghost:active{transform:translateY(1px);}
+
+  .note{font-size:.82rem;color:var(--warn);margin-top:10px;min-height:1.1em;}
+  .note.ok{color:var(--good);}
+  .samples{margin-top:14px;font-size:.82rem;color:var(--ink-soft);}
+  .samples a{color:var(--accent);cursor:pointer;text-decoration:underline dotted;margin-right:12px;}
+  footer{text-align:center;color:var(--ink-soft);font-size:.78rem;margin-top:30px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="peachicon">🍑</span>
+    <h1>おしりモールス変換器</h1>
+    <p class="tagline">日本語を「おなら」のモールス信号に変換して、こっそり伝えよう。</p>
+    <div class="legend">
+      <span>長点 <b>－</b> → <b>ﾊﾟｧｰﾝｯ‼︎</b></span>
+      <span>短点 <b>・</b> → <b>ﾌﾟﾘｯ</b></span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-enc" onclick="setMode('enc')">✍️ エンコード</button>
+    <button class="tab" id="tab-dec" onclick="setMode('dec')">🔍 デコード</button>
+  </div>
+
+  <div class="card">
+    <!-- ENCODE -->
+    <div id="panel-enc">
+      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）</div>
+      <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
+      <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
+      <div class="samples">
+        例文：
+        <a onclick="sample('おしり')">おしり</a>
+        <a onclick="sample('好きです')">好きです</a>
+        <a onclick="sample('今日は良い天気')">今日は良い天気</a>
+      </div>
+      <div class="arrow">⬇️ よみがな</div>
+      <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
+      <textarea id="enc-yomi" class="out yomi" readonly placeholder="漢字はここで読みに変換されます"></textarea>
+      <div class="arrow">🍑 ⬇️ おしり</div>
+      <label class="field-label" for="enc-out">おしりモールス（SNSにコピペ）</label>
+      <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
+      <div class="note ok" id="enc-note"></div>
+      <div class="btnrow">
+        <button class="act btn-primary" onclick="copyOut('enc-out','enc-note')">📋 コピー</button>
+        <button class="act btn-ghost" onclick="clearAll('enc')">🧹 クリア</button>
+      </div>
+    </div>
+
+    <!-- DECODE -->
+    <div id="panel-dec" style="display:none">
+      <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
+      <textarea id="dec-in" placeholder="例：ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ"></textarea>
+      <div class="arrow">🔍 ⬇️</div>
+      <label class="field-label" for="dec-out">復元された日本語</label>
+      <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
+      <div class="note ok" id="dec-note"></div>
+      <div class="btnrow">
+        <button class="act btn-primary" onclick="copyOut('dec-out','dec-note')">📋 コピー</button>
+        <button class="act btn-ghost" onclick="clearAll('dec')">🧹 クリア</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    和文モールス符号ベース／変換はすべてブラウザ内で完結（送信なし）。<br>
+    対応：ひらがな・カタカナ・濁点・半濁点・長音「ー」・「、」「。」。スペースは単語区切り「／」になります。
+  </footer>
+</div>
+
+<script>
+/* ===== おしりモールス 変換コア ===== */
+const DASH = "ﾊﾟｧｰﾝｯ‼︎";   // 長点 －
+const DOT  = "ﾌﾟﾘｯ";        // 短点 ・
+
+// 和文モールス符号（・=. －=- で保持）
+const H2M = {
+  "あ":"--.--","い":".-","う":"..-","え":"-.---","お":".-...",
+  "か":".-..","き":"-.-..","く":"...-","け":"-.--","こ":"----",
+  "さ":"-.-.-","し":"--.-.","す":"---.-","せ":".---.","そ":"---.",
+  "た":"-.","ち":"..-.","つ":".--.","て":".-.--","と":"..-..",
+  "な":".-.","に":"-.-.","ぬ":"....","ね":"--.-","の":"..--",
+  "は":"-...","ひ":"--..-","ふ":"--..","へ":".","ほ":"-..",
+  "ま":"-..-","み":"..-.-","む":"-","め":"-...-","も":"-..-.",
+  "や":".--","ゆ":"-..--","よ":"--",
+  "ら":"...","り":"--.","る":"-.--.","れ":"---","ろ":".-.-",
+  "わ":"-.-","ゐ":".-..-","ゑ":".--..","を":".---","ん":".-.-.",
+  "ー":".--.-",                       // 長音符
+  "゙":"..",                       // 濁点（合成用）
+  "゚":"..--.",                    // 半濁点（合成用）
+  "、":".-.-.-","。":".-.-..","，":".-.-.-","．":".-.-.."
+};
+
+// 小書きかな → 大書きかな（和文モールスに小書きは無いため）
+const SMALL = {"ぁ":"あ","ぃ":"い","ぅ":"う","ぇ":"え","ぉ":"お",
+  "っ":"つ","ゃ":"や","ゅ":"ゆ","ょ":"よ","ゎ":"わ","ゕ":"か","ゖ":"け"};
+
+// 逆引き（モールス → 文字）
+const M2H = {};
+for(const k in H2M){ M2H[H2M[k]] = k; }
+// 句読点は和文の「、」「。」を正規の復元先にする（，．は入力用の別名）
+M2H[".-.-.-"] = "、";
+M2H[".-.-.."] = "。";
+
+function kataToHira(ch){
+  const c = ch.charCodeAt(0);
+  if(c >= 0x30A1 && c <= 0x30F6) return String.fromCharCode(c - 0x60);
+  return ch;
+}
+function morseToOshiri(m){
+  let s = "";
+  for(const ch of m) s += (ch === "-") ? DASH : DOT;
+  return s;
+}
+
+/* ---- 漢字 → 読み（かな）：kuromoji.js による形態素解析 ---- */
+let tokenizer = null;   // 辞書ロード完了でセットされる
+function wordToKana(word){
+  if(!tokenizer) return word;            // 辞書未ロード時は素通り（かなはそのまま使える）
+  try{
+    return tokenizer.tokenize(word).map(t=>{
+      const r = t.reading;               // 読み（カタカナ）。後段でひらがなに正規化される
+      return (r && r !== "*") ? r : t.surface_form;
+    }).join("");
+  }catch(e){ return word; }
+}
+
+/* ---- 読みプレビュー：日本語 → ひらがな読み（おしり化の前段） ---- */
+function toHiraReading(input){
+  const words = input.trim().split(/[\s　]+/).filter(Boolean);
+  return words.map(w=>{
+    const kana = wordToKana(w);          // 漢字→読み（カタカナ）。かなはそのまま
+    let out = "";
+    for(const ch of kana) out += kataToHira(ch);   // 表示用にひらがな化（漢字が残れば素通り）
+    return out;
+  }).join(" ");
+}
+
+/* ---- エンコード：日本語 → おしりモールス ---- */
+function encode(input){
+  const unknown = new Set();
+  const words = input.trim().split(/[\s　]+/).filter(Boolean);
+  const outWords = words.map(word=>{
+    word = wordToKana(word);             // 漢字を読みに変換してから処理
+    const nfd = word.normalize("NFD");
+    const units = [];
+    for(const ch of nfd){
+      if(ch === "゙"){ units.push(morseToOshiri(H2M["゙"])); continue; }
+      if(ch === "゚"){ units.push(morseToOshiri(H2M["゚"])); continue; }
+      let c = kataToHira(ch);
+      if(SMALL[c]) c = SMALL[c];
+      if(H2M[c]){ units.push(morseToOshiri(H2M[c])); continue; }
+      if(ch === "／" || ch === "/"){ continue; }   // 入力中のスラッシュは無視
+      unknown.add(ch);
+      units.push("【未対応:" + ch + "】");
+    }
+    return units.join("　");
+  });
+  return { text: outWords.join(" ／ "), unknown:[...unknown] };
+}
+
+/* ---- デコード：おしりモールス → 日本語 ---- */
+function decode(input){
+  const bad = [];
+  const words = input.split("／");
+  const outWords = words.map(word=>{
+    const units = word.split(/[\s　]+/).filter(Boolean);
+    let line = "";
+    for(const u of units){
+      let m = "", i = 0;
+      while(i < u.length){
+        if(u.startsWith(DASH, i)){ m += "-"; i += DASH.length; }
+        else if(u.startsWith(DOT, i)){ m += "."; i += DOT.length; }
+        else { i++; }   // 余計な文字はスキップ
+      }
+      if(m === "") continue;
+      if(M2H[m] !== undefined){ line += M2H[m]; }
+      else { line += "【?】"; bad.push(u); }
+    }
+    return line;
+  });
+  // 合成用の濁点・半濁点を結合（か+゙→が など）
+  const joined = outWords.filter(w=>w!=="").join(" ").normalize("NFC");
+  return { text: joined, bad };
+}
+
+/* ===== UI ===== */
+let mode = "enc";
+function setMode(m){
+  mode = m;
+  document.getElementById("panel-enc").style.display = m==="enc" ? "" : "none";
+  document.getElementById("panel-dec").style.display = m==="dec" ? "" : "none";
+  document.getElementById("tab-enc").classList.toggle("active", m==="enc");
+  document.getElementById("tab-dec").classList.toggle("active", m==="dec");
+}
+
+function runEncode(){
+  const v = document.getElementById("enc-in").value;
+  const note = document.getElementById("enc-note");
+  if(!v.trim()){ document.getElementById("enc-out").value=""; document.getElementById("enc-yomi").value=""; note.textContent=""; return; }
+  document.getElementById("enc-yomi").value = toHiraReading(v);
+  const r = encode(v);
+  document.getElementById("enc-out").value = r.text;
+  if(r.unknown.length){
+    note.className = "note";
+    note.textContent = "⚠️ 変換できない文字：" + r.unknown.join(" ") + "（ひらがな・カタカナのみ対応）";
+  } else { note.className="note ok"; note.textContent="✅ 変換できました"; }
+}
+function runDecode(){
+  const v = document.getElementById("dec-in").value;
+  const note = document.getElementById("dec-note");
+  if(!v.trim()){ document.getElementById("dec-out").value=""; note.textContent=""; return; }
+  const r = decode(v);
+  document.getElementById("dec-out").value = r.text;
+  if(r.bad.length){
+    note.className="note";
+    note.textContent = "⚠️ 解読できない符号がありました（【?】部分）";
+  } else { note.className="note ok"; note.textContent="✅ 復元できました"; }
+}
+
+function sample(t){ document.getElementById("enc-in").value = t; runEncode(); }
+function clearAll(m){
+  document.getElementById(m+"-in").value="";
+  document.getElementById(m+"-out").value="";
+  if(m==="enc") document.getElementById("enc-yomi").value="";
+  document.getElementById(m+"-note").textContent="";
+  document.getElementById(m+"-in").focus();
+}
+async function copyOut(id, noteId){
+  const txt = document.getElementById(id).value;
+  const note = document.getElementById(noteId);
+  if(!txt){ return; }
+  try{
+    await navigator.clipboard.writeText(txt);
+    note.className="note ok"; note.textContent="📋 コピーしました！";
+  }catch(e){
+    const el = document.getElementById(id);
+    el.select(); document.execCommand("copy");
+    note.className="note ok"; note.textContent="📋 コピーしました！";
+  }
+}
+
+document.getElementById("enc-in").addEventListener("input", runEncode);
+document.getElementById("dec-in").addEventListener("input", runDecode);
+
+/* ---- 漢字辞書（kuromoji）のロード ---- */
+(function loadDict(){
+  const status = document.getElementById("dict-status");
+  if(typeof kuromoji === "undefined"){
+    status.className = "dict-status fail";
+    status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
+    return;
+  }
+  kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" })
+    .build(function(err, tk){
+      if(err){
+        status.className = "dict-status fail";
+        status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
+        return;
+      }
+      tokenizer = tk;
+      status.className = "dict-status ready";
+      status.textContent = "✅ 漢字対応OK（漢字混じりの文章もそのまま変換できます）";
+      runEncode();   // 既に入力済みなら再変換
+    });
+})();
+</script>
+</body>
+</html>
