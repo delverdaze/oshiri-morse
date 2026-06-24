@@ -193,7 +193,7 @@
   <div class="card">
     <!-- ENCODE -->
     <div id="panel-enc">
-      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）</div>
+      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）</div>
       <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
       <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
       <div class="samples">
@@ -296,6 +296,21 @@ const H2M = {
   "、":".-.-.-","。":".-.-..","，":".-.-.-","．":".-.-.."
 };
 
+// 欧文モールス符号（アルファベット）
+const E2M = {
+  "A":".-", "B":"-...", "C":"-.-.", "D":"-..", "E":".",
+  "F":"..-.", "G":"--.", "H":"....", "I":"..", "J":".---",
+  "K":"-.-", "L":".-..", "M":"--", "N":"-.", "O":"---",
+  "P":".---.", "Q":"--.-", "R":".-.", "S":"...", "T":"-",
+  "U":"..-", "V":"...-", "W":".--", "X":"-..-", "Y":"-.--", "Z":"--.."
+};
+
+// 数字モールス符号
+const NUM2M = {
+  "1":".----", "2":"..---", "3":"...--", "4":"....-", "5":".....",
+  "6":"-....", "7":"--...", "8":"---..", "9":"----.", "0":"-----"
+};
+
 // 小書きかな → 大書きかな（和文モールスに小書きは無いため）
 const SMALL = {"ぁ":"あ","ぃ":"い","ぅ":"う","ぇ":"え","ぉ":"お",
   "っ":"つ","ゃ":"や","ゅ":"ゆ","ょ":"よ","ゎ":"わ","ゕ":"か","ゖ":"け"};
@@ -306,6 +321,12 @@ for(const k in H2M){ M2H[H2M[k]] = k; }
 // 句読点は和文の「、」「。」を正規の復元先にする（，．は入力用の別名）
 M2H[".-.-.-"] = "、";
 M2H[".-.-.."] = "。";
+
+const M2E = {};
+for(const k in E2M){ M2E[E2M[k]] = k.toLowerCase(); } // 小文字で復元する
+
+const M2NUM = {};
+for(const k in NUM2M){ M2NUM[NUM2M[k]] = k; }
 
 function kataToHira(ch){
   const c = ch.charCodeAt(0);
@@ -348,23 +369,56 @@ function toHiraReading(input){
 function encode(input){
   const unknown = new Set();
   const words = input.trim().split(/[\s　]+/).filter(Boolean);
+  let isRomajiMode = false;
   const outWords = words.map(word=>{
     word = wordToKana(word);             // 漢字を読みに変換してから処理
     const nfd = word.normalize("NFD");
     const units = [];
     for(const ch of nfd){
-      if(ch === "゙"){ units.push(morseToOshiri(H2M["゙"])); continue; }
-      if(ch === "゚"){ units.push(morseToOshiri(H2M["゚"])); continue; }
+      const norm = ch.normalize("NFKC");
+      if(ch === "゙" || ch === "゚"){
+        if(isRomajiMode){
+          units.push(morseToOshiri("---.-"));
+          isRomajiMode = false;
+        }
+        const key = ch === "゙" ? "゙" : "゚";
+        units.push(morseToOshiri(H2M[key]));
+        continue;
+      }
+      if(/[A-Za-z]/.test(norm)){
+        const uChar = norm.toUpperCase();
+        if(!isRomajiMode){
+          units.push(morseToOshiri("-..---"));
+          isRomajiMode = true;
+        }
+        units.push(morseToOshiri(E2M[uChar]));
+        continue;
+      }
+      if(/[0-9]/.test(norm)){
+        units.push(morseToOshiri(NUM2M[norm]));
+        continue;
+      }
       let c = kataToHira(ch);
       if(SMALL[c]) c = SMALL[c];
-      if(H2M[c]){ units.push(morseToOshiri(H2M[c])); continue; }
+      if(H2M[c]){
+        if(isRomajiMode){
+          units.push(morseToOshiri("---.-"));
+          isRomajiMode = false;
+        }
+        units.push(morseToOshiri(H2M[c]));
+        continue;
+      }
       if(ch === "／" || ch === "/"){ continue; }   // 入力中のスラッシュは無視
       unknown.add(ch);
       units.push("【未対応:" + ch + "】");
     }
     return units.join("　");
   });
-  return { text: outWords.join(" ／ "), unknown:[...unknown] };
+  let text = outWords.join(" ／ ");
+  if(isRomajiMode){
+    text += "　" + morseToOshiri("---.-");
+  }
+  return { text: text, unknown:[...unknown] };
 }
 
 /* ---- デコード：おしりモールス → 日本語 ---- */
@@ -372,6 +426,7 @@ function decode(input){
   const bad = [];
   input = input.replace(VS_RE, "");   // 異体字セレクタを除去して照合を堅牢に
   const words = input.split("／");
+  let isRomajiMode = false;
   const outWords = words.map(word=>{
     const units = word.split(/[\s　]+/).filter(Boolean);
     let line = "";
@@ -383,8 +438,31 @@ function decode(input){
         else { i++; }   // 余計な文字はスキップ
       }
       if(m === "") continue;
-      if(M2H[m] !== undefined){ line += M2H[m]; }
-      else { line += "【?】"; bad.push(u); }
+      if(m === "-..---"){
+        isRomajiMode = true;
+        continue;
+      }
+      if(m === "---.-" || m === "-.-.-"){
+        isRomajiMode = false;
+        continue;
+      }
+      if(M2NUM[m] !== undefined){
+        line += M2NUM[m];
+      } else if(isRomajiMode){
+        if(M2E[m] !== undefined){
+          line += M2E[m];
+        } else {
+          line += "【?】";
+          bad.push(u);
+        }
+      } else {
+        if(M2H[m] !== undefined){
+          line += M2H[m];
+        } else {
+          line += "【?】";
+          bad.push(u);
+        }
+      }
     }
     return line;
   });
@@ -542,16 +620,14 @@ function getMaster(){
 let whipBuffer = null, popBuffer = null;
 const WHIP_OFFSET = 0.20;   // ﾊﾟｧｰﾝ：頭の無音をスキップ
 const POP_OFFSET  = 0.10;   // ﾌﾟﾘ：頭の無音をスキップ
-function b64ToArrayBuffer(b64){
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
-  return bytes.buffer;
-}
 (function loadSamples(){
-  function load(b64, set){
-    try{ getCtx().decodeAudioData(b64ToArrayBuffer(b64)).then(set).catch(()=>{}); }
-    catch(e){}   // 失敗時は合成音にフォールバック
+  async function load(b64, set){
+    try{
+      const res = await fetch("data:audio/mp3;base64," + b64);
+      const buf = await res.arrayBuffer();
+      const audioBuf = await getCtx().decodeAudioData(buf);
+      set(audioBuf);
+    }catch(e){}   // 失敗時は合成音にフォールバック
   }
   if(typeof WHIP_B64 !== "undefined") load(WHIP_B64, b => { whipBuffer = b; });
   if(typeof POP_B64  !== "undefined") load(POP_B64,  b => { popBuffer  = b; });
@@ -741,8 +817,12 @@ function puffThrottled(el){
   lastPuff = now;
   puffFrom(el, 1);
 }
+let lastPoke = 0;
 // 🍑 をつつくと震えて、ペチッ＋「ﾌﾟﾘｯ」を1発（たまにバチーン）
 function poke(el){
+  const now = Date.now();
+  if(now - lastPoke < 100) return;   // 100ms以内の連打は無視
+  lastPoke = now;
   el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle");
   puffFrom(el, 2);
   const ctx = getCtx();
@@ -764,7 +844,11 @@ function failDict(){
   if(dictTimer) clearTimeout(dictTimer);
   dictState = "failed";
   status.className = "dict-status fail";
-  status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナは利用できます）";
+  if (window.location.protocol === "file:") {
+    status.textContent = "⚠️ 漢字辞書を読み込めませんでした（file:// スキームのCORS制限のため。ローカルサーバーを起動するか、ひらがな・カタカナ・英数字で入力してください）";
+  } else {
+    status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナ・英数字は利用できます）";
+  }
   runEncode();
 }
 
@@ -792,7 +876,7 @@ function requestDict(){
   dictState = "loading";
   const status = document.getElementById("dict-status");
   status.className = "dict-status loading";
-  status.textContent = "📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）";
+  status.textContent = "📖 漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）";
   const script = document.createElement("script");
   script.src = "kuromoji.js";
   script.async = true;
