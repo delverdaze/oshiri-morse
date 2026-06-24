@@ -193,7 +193,7 @@
   <div class="card">
     <!-- ENCODE -->
     <div id="panel-enc">
-      <div class="dict-status" id="dict-status">📖 漢字を入力すると、読み辞書を読み込みます（ひらがな・カタカナはすぐ使えます）</div>
+      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）</div>
       <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
       <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
       <div class="samples">
@@ -758,7 +758,7 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); }
 document.getElementById("enc-in").addEventListener("input", runEncode);
 document.getElementById("dec-in").addEventListener("input", runDecode);
 
-/* ---- 漢字辞書（kuromoji）のロード：漢字入力時にだけ非同期で取得 ---- */
+/* ---- 漢字辞書（kuromoji）のロード：ページ表示後に非同期で取得 ---- */
 function failDict(){
   const status = document.getElementById("dict-status");
   if(dictTimer) clearTimeout(dictTimer);
@@ -803,6 +803,8 @@ function requestDict(){
     if(dictState === "loading") failDict();
   }, 15000);
 }
+
+requestDict();
 </script>
 </body>
 </html>
