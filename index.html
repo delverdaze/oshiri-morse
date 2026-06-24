@@ -598,7 +598,10 @@ async function copyOut(id, noteId){
 /* ===== 🔊 お尻ペチペチ音エンジン（Web Audio・音源ファイル不要） ===== */
 let audioCtx = null;
 function getCtx(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    loadSamples();
+  }
   return audioCtx;
 }
 // マスター：コンプ＋ゲイン（パンチを保ちつつ歪みすぎを防ぐ）
@@ -620,7 +623,8 @@ function getMaster(){
 let whipBuffer = null, popBuffer = null;
 const WHIP_OFFSET = 0.20;   // ﾊﾟｧｰﾝ：頭の無音をスキップ
 const POP_OFFSET  = 0.10;   // ﾌﾟﾘ：頭の無音をスキップ
-(function loadSamples(){
+function loadSamples(){
+  if (whipBuffer || popBuffer) return;
   async function load(b64, set){
     try{
       const res = await fetch("data:audio/mp3;base64," + b64);
@@ -631,7 +635,7 @@ const POP_OFFSET  = 0.10;   // ﾌﾟﾘ：頭の無音をスキップ
   }
   if(typeof WHIP_B64 !== "undefined") load(WHIP_B64, b => { whipBuffer = b; });
   if(typeof POP_B64  !== "undefined") load(POP_B64,  b => { popBuffer  = b; });
-})();
+}
 // お尻を叩く音を時刻 t に鳴らす
 //   "dot"=ﾌﾟﾘ → かわいく「ちょん♡」と触れる音
 //   "dash"=ﾊﾟｧｰﾝ → 思いっきり叩く破裂音「バチーン！」
