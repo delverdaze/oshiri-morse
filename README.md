@@ -88,9 +88,16 @@
 
 | 素材 | 用途 | 出典 | ライセンス |
 |---|---|---|---|
-| Whip / 鞭のしなる音 | 「ﾊﾟｧｰﾝ」の破裂音 | [Pixabay – universfield](https://pixabay.com/) | Pixabay Content License（商用可・帰属不要） |
+| Whip / 鞭のしなる音 | 「ﾊﾟｧｰﾝ」の破裂音 | [Universfield](https://pixabay.com/ja/users/universfield-28281460/) (Pixabay) | Pixabay Content License |
+| Bubble pop | 「ﾌﾟﾘ」のかわいい音 | [Universfield](https://pixabay.com/ja/users/universfield-28281460/) (Pixabay) | Pixabay Content License |
 
-※ base64 で `index.html` に内蔵しているため、オフラインでも鳴ります。「ﾌﾟﾘ」は Web Audio による合成音です。
+クレジット：
+
+> Sound Effect by [Universfield](https://pixabay.com/ja/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123738) from [Pixabay](https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123738)
+>
+> Sound Effect by [Universfield](https://pixabay.com/ja/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342) from [Pixabay](https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342)
+
+※ base64 で `index.html` に内蔵しているため、オフラインでも鳴ります（「ﾌﾟﾘ」は実録サンプル未ロード時のみ Web Audio 合成にフォールバック）。
 
 ---
 
