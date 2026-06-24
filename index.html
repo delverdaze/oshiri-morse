@@ -772,7 +772,7 @@ function buildTokenizer(){
   if(dictState !== "loading") return;
   if(typeof kuromoji === "undefined"){ failDict(); return; }
   try{
-    kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" })
+    kuromoji.builder({ dicPath: "dict/" })
       .build(function(err, tk){
         if(dictState !== "loading") return;
         if(err){ failDict(); return; }
@@ -794,7 +794,7 @@ function requestDict(){
   status.className = "dict-status loading";
   status.textContent = "📖 漢字辞書を読み込み中…（ひらがな・カタカナは今すぐ使えます）";
   const script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js";
+  script.src = "kuromoji.js";
   script.async = true;
   script.onload = buildTokenizer;
   script.onerror = failDict;
