@@ -449,8 +449,8 @@ function b64ToArrayBuffer(b64){
 // お尻を叩く音を時刻 t に鳴らす
 //   "dot"=ﾌﾟﾘ → かわいく「ちょん♡」と触れる音
 //   "dash"=ﾊﾟｧｰﾝ → 思いっきり叩く破裂音「バチーン！」
-function hit(ctx, t, dur, type){
-  const dest = getMaster();
+function hit(ctx, t, dur, type, out){
+  const dest = out || getMaster();
 
   if(type === "dash"){
     // 実録サンプルがあれば、それを再生（頭の無音を飛ばし、毎回少し揺らす）
@@ -542,20 +542,35 @@ function hit(ctx, t, dur, type){
   }
 }
 
-let playTimer = null;
+// 再生セッション状態（重複再生を防ぎ、停止できるようにする）
+let play = { on:false, bus:null, btn:null, timer:null };
+
+function stopPlay(){
+  if(play.timer) clearTimeout(play.timer);
+  if(play.bus){ try{ play.bus.disconnect(); }catch(e){} }   // バス切断で以降の音を即停止
+  if(play.btn){
+    play.btn.classList.remove("playing");
+    if(play.btn.dataset.orig) play.btn.innerHTML = play.btn.dataset.orig;
+  }
+  const peach = document.getElementById("peach");
+  peach && peach.classList.remove("wiggle");
+  play = { on:false, bus:null, btn:null, timer:null };
+}
+
 // おしりモールス文字列をモールスのリズムで再生
 function playOshiri(text, btn){
   if(!text.trim()) return;
   const ctx = getCtx();
   if(ctx.state === "suspended") ctx.resume();
+  const bus = ctx.createGain(); bus.connect(getMaster());   // このセッション専用の出力バス
   const DOT_D=0.12, DASH_D=0.34, INTRA=0.06, LETTER=0.26, WORD=0.6;
   let t = ctx.currentTime + 0.06;
   for(const word of text.split("／")){
     for(const u of word.split(/[\s　]+/).filter(Boolean)){
       let i=0;
       while(i<u.length){
-        if(u.startsWith(DASH,i)){ hit(ctx,t,DASH_D,"dash"); t+=DASH_D+INTRA; i+=DASH.length; }
-        else if(u.startsWith(DOT,i)){ hit(ctx,t,DOT_D,"dot"); t+=DOT_D+INTRA; i+=DOT.length; }
+        if(u.startsWith(DASH,i)){ hit(ctx,t,DASH_D,"dash",bus); t+=DASH_D+INTRA; i+=DASH.length; }
+        else if(u.startsWith(DOT,i)){ hit(ctx,t,DOT_D,"dot",bus); t+=DOT_D+INTRA; i+=DOT.length; }
         else { i++; }
       }
       t += LETTER;
@@ -565,20 +580,26 @@ function playOshiri(text, btn){
   // 再生中UI
   const total = (t - ctx.currentTime) * 1000;
   const peach = document.getElementById("peach");
-  if(btn){ btn.classList.add("playing"); }
+  if(btn){
+    if(!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = "⏹ 停止";
+    btn.classList.add("playing");
+  }
   peach && peach.classList.add("wiggle");
-  clearTimeout(playTimer);
-  playTimer = setTimeout(()=>{
-    if(btn) btn.classList.remove("playing");
-    peach && peach.classList.remove("wiggle");
-  }, total + 150);
+  play = { on:true, bus, btn, timer:null };
+  play.timer = setTimeout(stopPlay, total + 150);
 }
 
 function listen(srcId, btnId){
   const text = document.getElementById(srcId).value;
   const btn = document.getElementById(btnId);
   if(!text.trim()){ return; }
-  playOshiri(text, btn);
+  if(play.on){                       // 再生中なら一旦停止
+    const same = (play.btn === btn);
+    stopPlay();
+    if(same) return;                 // 同じボタン → 停止のみ（もう一度押すと最初から）
+  }
+  playOshiri(text, btn);             // 別ボタン or 停止状態 → 最初から再生
 }
 
 /* ===== 💥 ビジュアル演出（ペチッ！） ===== */
