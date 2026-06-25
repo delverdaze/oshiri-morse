@@ -580,37 +580,42 @@ function clearAll(m){
   document.getElementById(m+"-note").textContent="";
   document.getElementById(m+"-in").focus();
 }
-// iOS Safari は readonly の textarea だと選択コピーできないことがある。
-// 一時的に readonly を外して選択 → execCommand し、成否を返す。
-function legacyCopy(el){
-  const wasReadOnly = el.readOnly;
-  el.readOnly = false;
-  el.focus();
-  el.setSelectionRange(0, el.value.length);
+// クリップボードAPIが使えない/拒否される環境（iOSのBrave等）向けの同期コピー。
+// 入力欄をフォーカスしない（＝キーボードが出ない）。ユーザー操作中に同期実行すること。
+function legacyCopy(txt){
+  const span = document.createElement("span");
+  span.textContent = txt;
+  span.style.cssText = "position:fixed;left:-9999px;top:0;white-space:pre;user-select:text;-webkit-user-select:text;";
+  document.body.appendChild(span);
   let ok = false;
-  try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
-  el.readOnly = wasReadOnly;
-  window.getSelection && window.getSelection().removeAllRanges();
-  el.blur();
+  try{
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(span);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ok = document.execCommand("copy");
+    sel.removeAllRanges();
+  }catch(e){ ok = false; }
+  document.body.removeChild(span);
   return ok;
 }
-async function copyOut(id, noteId){
+function copyOut(id, noteId){
   const el = document.getElementById(id);
   const note = document.getElementById(noteId);
   const txt = el.value;
   if(!txt){ return; }
-  let ok = false;
-  try{
-    await navigator.clipboard.writeText(txt);
-    ok = true;
-  }catch(e){
-    ok = legacyCopy(el);     // クリップボードAPIが使えない環境のフォールバック
-  }
-  if(ok){
-    note.className="note ok"; note.textContent="📋 コピーしました！";
-    puffFrom(el, 3);
+  const done = (ok)=>{
+    if(ok){ note.className="note ok"; note.textContent="📋 コピーしました！"; puffFrom(el, 3); }
+    else  { note.className="note"; note.textContent="⚠️ コピーできませんでした。出力を長押しして選択 → コピーしてください。"; }
+  };
+  // まずユーザー操作中（同期）に execCommand コピー。iOS Safari/Brave 等で確実に動く。
+  if(legacyCopy(txt)){ done(true); return; }
+  // 同期コピーが不可なら非同期クリップボードAPIを試す（デスクトップ等のフォールバック）。
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>done(true)).catch(()=>done(false));
   }else{
-    note.className="note"; note.textContent="⚠️ コピーできませんでした。出力を長押しして選択 → コピーしてください。";
+    done(false);
   }
 }
 
