@@ -156,9 +156,10 @@
 oshiri-morse/
 ├── index.html              # マークアップ（構造のみ。CSS/JSは外部ファイル）
 ├── style.css               # スタイル（配色・レイアウト・アニメーション）
-├── morse.js                # 変換コア（純粋ロジック。ブラウザ/Node 両対応）
-├── app.js                  # UIロジック（DOM・音声・コピー・辞書ロード）
-├── dom-contract.md         # リデザイン時に保持すべき要素ID・data-action 等
+├── morse.js                # 変換コア（純粋ロジック。window.Morse / Node 両対応）
+├── app.js                  # UIロジック（DOM・音声・コピー・辞書ロード。IIFE）
+├── contract.js             # HTML↔JS↔CSS 契約の単一情報源（ID/action/class）
+├── dom-contract.md         # 契約の解説（リデザイン時に保持すべき要素ID 等）
 ├── assets/                 # 効果音 whip.mp3 / pop.mp3（ﾊﾟｧｰﾝ・ﾌﾟﾘ）
 ├── kuromoji.js             # 形態素解析ライブラリ本体（同梱）
 ├── dict/                   # kuromoji の辞書ファイル一式（同梱・約17MB）

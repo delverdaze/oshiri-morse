@@ -5,13 +5,19 @@
 リデザインの際は、デザインを変えても下記の契約を満たすようにしてください。これらを保てば、変換・音声・コピー・辞書ロードのロジックはそのまま動きます。
 
 > 触ってよい領域：`index.html` の構造／`style.css`
-> 触らない領域：`app.js`（UIロジック）／`morse.js`（変換コア）
+> 触らない領域：`app.js`（UIロジック）／`morse.js`（変換コア）／`contract.js`（契約定義）
+
+**この契約は `contract.js` が単一情報源（single source of truth）です。**
+`contract.js` の `REQUIRED_IDS` / `ACTION_ATTRS` / `STATE_CLASSES` を、実行時には
+`app.js`（起動時の存在チェック）が、CI では `test/*.test.js` が参照します。
+本ドキュメントはその人間向けの解説で、機械的な検証は `contract.js` ＋テストが担います。
 
 ---
 
 ## 1. 要素 ID（必須）
 
-`app.js` が `getElementById` で参照します。**ID 名は変更しないでください。**
+`app.js` が `contract.js` の `REQUIRED_IDS` を介して `getElementById` で参照します。
+**ID 名は変更しないでください**（変更する場合は `contract.js` も合わせて更新）。
 
 | ID | 役割 | 要素の要件 |
 |---|---|---|
@@ -76,11 +82,28 @@
 `</body>` 直前で、必ず **この順**の classic script として読み込みます。
 
 ```html
-<script src="morse.js"></script>   <!-- 変換コア（グローバル定義） -->
-<script src="app.js"></script>     <!-- UI（morse.js のグローバルに依存） -->
+<script src="contract.js"></script> <!-- 契約定義（window.Contract） -->
+<script src="morse.js"></script>    <!-- 変換コア（window.Morse） -->
+<script src="app.js"></script>      <!-- UI（Morse / Contract に依存） -->
 ```
 
-- どちらも同期スクリプト。記述順に実行されるため、`app.js` 実行時には `morse.js` の
-  グローバル（`encode` / `decode` / `KANJI_RE` / `tokenizer` 等）が必ず定義済み。
+- いずれも同期スクリプト。記述順に実行されるため、`app.js` 実行時には
+  `window.Morse`（`encode` / `decode` / `KANJI_RE` 等）と `window.Contract` が必ず定義済み。
+- **グローバルは `window.Morse` と `window.Contract` の2つだけ**。それ以外（`app.js` の関数群、
+  `morse.js`・`contract.js` の内部）は IIFE / UMDライトのクロージャに閉じてグローバルを汚さない。
+- 漢字の読みに使う形態素解析器は `app.js` が kuromoji ロード後に
+  `Morse.setTokenizer(tk)` で注入する（`morse.js` は kuromoji に非依存のまま）。
 - `kuromoji.js` は `app.js` が実行時に動的ロード（非同期・失敗時フォールバックあり）。
-- **`type="module"` にはしないでください**：委譲で参照する関数群がグローバルである前提です。
+- **`type="module"` にはしないでください**：`window.Morse` / `window.Contract` という
+  グローバル名前空間で受け渡す前提のため（module 化すると参照が壊れます）。
+
+## 5. 契約を破ったら気づける仕組み
+
+| 仕組み | 何を検知するか | いつ |
+|---|---|---|
+| `app.js` の起動時チェック | `REQUIRED_IDS` の要素欠落 | ブラウザのコンソールで即時 |
+| `test/dom-contract.test.js` | ID・data-action・補助属性・読み込み順 | CI（push/PR） |
+| `test/css-contract.test.js` | `STATE_CLASSES` が `style.css` に存在するか | CI（push/PR） |
+
+リデザインで `contract.js` の項目を消す/変える場合は、HTML・CSS・テストが
+セットでズレないよう、`contract.js` を起点に更新してください。
