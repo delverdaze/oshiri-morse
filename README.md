@@ -143,23 +143,10 @@
 
 ## 🚀 使い方
 
-### ローカル
-
 `index.html` をブラウザで開くだけで使えます。
 
 > [!WARNING]
-> ファイルを直接ダブルクリックして `file://` スキームで開いた場合、ブラウザのセキュリティ制限（CORS）により漢字の自動読み取り（kuromoji.js）が失敗します。ひらがな・カタカナ・英数字での入力はそのまま使えますが、漢字の自動変換も使いたい場合は、以下のコマンド等でローカルサーバーを起動してアクセスしてください。
-> 
-> ```bash
-> python -m http.server 8000
-> ```
-> 起動後、ブラウザで `http://localhost:8000/` にアクセスします。
-
-### GitHub Pages で公開
-
-1. リポジトリの **Settings → Pages**
-2. **Source** を `Deploy from a branch`、ブランチを `main` / `(root)` に設定
-3. 数十秒後に [https://delverdaze.github.io/oshiri-morse/](https://delverdaze.github.io/oshiri-morse/) で公開されます
+> ファイルを直接ダブルクリックして `file://` スキームで開いた場合、ブラウザのセキュリティ制限（CORS）により漢字の自動読み取り（kuromoji.js）が失敗します。ひらがな・カタカナ・英数字での入力はそのまま使えますが、漢字の自動変換も使いたい場合は、ご自身でローカルサーバーを立ててアクセスしてください。
 
 ---
 
@@ -167,7 +154,9 @@
 
 ```
 oshiri-morse/
-├── index.html              # アプリ本体（HTML/CSS/JS 全部入り）
+├── index.html              # アプリ本体（HTML/CSS/JS 全部入り、効果音も base64 で内蔵）
+├── kuromoji.js             # 形態素解析ライブラリ本体（同梱）
+├── dict/                   # kuromoji の辞書ファイル一式（同梱・約17MB）
 ├── ogp.jpg                 # SNS共有用のOGP画像
 ├── oshiri-morse-encode.md  # 原案ベースのエンコード仕様（プロンプト）
 ├── oshiri-morse-decode.md  # 原案ベースのデコード仕様（プロンプト）
