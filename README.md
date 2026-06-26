@@ -143,10 +143,20 @@
 
 ## 🚀 使い方
 
-`index.html` をブラウザで開くだけで使えます。
+**HTTP(S) 配信が必要**です（GitHub Pages にそのまま置くか、ローカルサーバー経由で開きます）。
+公開ページ [https://delverdaze.github.io/oshiri-morse/](https://delverdaze.github.io/oshiri-morse/) はそのまま使えます。
+
+手元で動かす場合は、リポジトリのルートで簡易サーバーを立ててアクセスしてください。
+
+```sh
+# 例：Python の簡易サーバー（ポートは任意）
+python3 -m http.server 8765
+# → ブラウザで http://localhost:8765/ を開く
+```
 
 > [!WARNING]
-> ファイルを直接ダブルクリックして `file://` スキームで開いた場合、ブラウザのセキュリティ制限（CORS）により漢字の自動読み取り（kuromoji.js）が失敗します。ひらがな・カタカナ・英数字での入力はそのまま使えますが、漢字の自動変換も使いたい場合は、ご自身でローカルサーバーを立ててアクセスしてください。
+> ファイルを直接ダブルクリックして `file://` スキームで開くと**動作しません**。
+> 本アプリは ES Modules（`import`）で構成されており、`file://` ではブラウザのセキュリティ制限（CORS）でモジュールが読み込めないためです。必ず上記のように HTTP(S) 経由でアクセスしてください。
 
 ---
 
@@ -154,18 +164,21 @@
 
 ```
 oshiri-morse/
-├── index.html              # マークアップ（構造のみ。CSS/JSは外部ファイル）
+├── index.html              # マークアップ（構造のみ。<script type=module src=app.js> 1本）
 ├── style.css               # スタイル（配色・レイアウト・アニメーション）
-├── morse.js                # 変換コア（純粋ロジック。window.Morse / Node 両対応）
-├── app.js                  # UIロジック（DOM・音声・コピー・辞書ロード。IIFE）
+├── app.js                  # UI統合（DOM結線・委譲・辞書ロード）。各モジュールを import
+├── morse.js                # 変換コア（純粋ロジック・ES Module）
+├── xpost.js                # 𝕏 文字数カウント（純粋・ES Module）
+├── effects.js              # ペチッ！の演出（ES Module）
+├── audio.js                # Web Audio エンジン（ES Module）
 ├── contract.js             # HTML↔JS↔CSS 契約の単一情報源（ID/action/class）
 ├── dom-contract.md         # 契約の解説（リデザイン時に保持すべき要素ID 等）
 ├── assets/                 # 効果音 whip.mp3 / pop.mp3（ﾊﾟｧｰﾝ・ﾌﾟﾘ）
 ├── kuromoji.js             # 形態素解析ライブラリ本体（同梱）
 ├── dict/                   # kuromoji の辞書ファイル一式（同梱・約17MB）
 ├── ogp.jpg                 # SNS共有用のOGP画像
-├── test/                   # 変換コアのテスト（node:test・依存ゼロ）
-├── package.json            # テスト実行用（npm test → node --test）
+├── test/                   # テスト（node:test・依存ゼロ。morse/xpost/契約）
+├── package.json            # テスト実行用（npm test → node --test）。type:module
 ├── .github/workflows/      # CI（push/PR 毎に node --test を自動実行）
 ├── oshiri-morse-encode.md  # 原案ベースのエンコード仕様（プロンプト）
 ├── oshiri-morse-decode.md  # 原案ベースのデコード仕様（プロンプト）

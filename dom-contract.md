@@ -5,7 +5,7 @@
 リデザインの際は、デザインを変えても下記の契約を満たすようにしてください。これらを保てば、変換・音声・コピー・辞書ロードのロジックはそのまま動きます。
 
 > 触ってよい領域：`index.html` の構造／`style.css`
-> 触らない領域：`app.js`（UIロジック）／`morse.js`（変換コア）／`contract.js`（契約定義）
+> 触らない領域：`app.js`（UI統合）／`morse.js`（変換コア）／`xpost.js`（𝕏カウント）／`effects.js`（演出）／`audio.js`（音声）／`contract.js`（契約定義）
 
 **この契約は `contract.js` が単一情報源（single source of truth）です。**
 `contract.js` の `REQUIRED_IDS` / `ACTION_ATTRS` / `STATE_CLASSES` を、実行時には
@@ -82,27 +82,35 @@
 `</body>` 直前で、必ず **この順**の classic script として読み込みます。
 
 ```html
-<script src="contract.js"></script> <!-- 契約定義（window.Contract） -->
-<script src="morse.js"></script>    <!-- 変換コア（window.Morse） -->
-<script src="app.js"></script>      <!-- UI（Morse / Contract に依存） -->
+<script type="module" src="app.js"></script>   <!-- これ1本だけ -->
 ```
 
-- いずれも同期スクリプト。記述順に実行されるため、`app.js` 実行時には
-  `window.Morse`（`encode` / `decode` / `KANJI_RE` 等）と `window.Contract` が必ず定義済み。
-- **グローバルは `window.Morse` と `window.Contract` の2つだけ**。それ以外（`app.js` の関数群、
-  `morse.js`・`contract.js` の内部）は IIFE / UMDライトのクロージャに閉じてグローバルを汚さない。
-- 漢字の読みに使う形態素解析器は `app.js` が kuromoji ロード後に
-  `Morse.setTokenizer(tk)` で注入する（`morse.js` は kuromoji に非依存のまま）。
-- `kuromoji.js` は `app.js` が実行時に動的ロード（非同期・失敗時フォールバックあり）。
-- **`type="module"` にはしないでください**：`window.Morse` / `window.Contract` という
-  グローバル名前空間で受け渡す前提のため（module 化すると参照が壊れます）。
+`app.js` が ES Module として依存を `import` で解決します（手動の読み込み順管理は不要）。
+
+```
+app.js ─┬─ import → morse.js     （変換コア）
+        ├─ import → contract.js  （契約定義）
+        ├─ import → xpost.js     （𝕏カウント）
+        ├─ import → effects.js   （演出）
+        └─ import → audio.js ──┬ import → morse.js
+                               └ import → effects.js
+```
+
+- **グローバルは一切公開しません**（`window.Morse` 等も無し）。各モジュールは module スコープに閉じ、
+  必要なものだけを `export` / `import` でやり取りします。
+- 漢字の読みに使う形態素解析器は `app.js` が kuromoji ロード後に `setTokenizer(tk)` で
+  変換コアへ注入する（`morse.js` は kuromoji に非依存のまま）。
+- `kuromoji.js` は外部UMDライブラリのため、従来どおり `app.js` が実行時に動的ロードし
+  `window.kuromoji` を参照する（非同期・失敗時フォールバックあり）。
+- **HTTP(S) 配信が前提**です（`file://` では CORS によりモジュールが読み込めません）。
+  ローカル確認はサーバー経由で行ってください。
 
 ## 5. 契約を破ったら気づける仕組み
 
 | 仕組み | 何を検知するか | いつ |
 |---|---|---|
 | `app.js` の起動時チェック | `REQUIRED_IDS` の要素欠落 | ブラウザのコンソールで即時 |
-| `test/dom-contract.test.js` | ID・data-action・補助属性・読み込み順 | CI（push/PR） |
+| `test/dom-contract.test.js` | ID・data-action・補助属性・module読込 | CI（push/PR） |
 | `test/css-contract.test.js` | `STATE_CLASSES` が `style.css` に存在するか | CI（push/PR） |
 
 リデザインで `contract.js` の項目を消す/変える場合は、HTML・CSS・テストが
