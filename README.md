@@ -12,7 +12,7 @@
 
 `🔊 おしりで聞く` ボタンを押すと、モールスのリズムに合わせて
 **かわいい「ﾌﾟﾘ」と本気の「ﾊﾟｧｰﾝ」のギャップ**を音で楽しめます。
-「ﾌﾟﾘ」と「ﾊﾟｧｰﾝ」には base64 で内蔵した効果音を使います。
+「ﾌﾟﾘ」と「ﾊﾟｧｰﾝ」には `assets/` に同梱した効果音（mp3）を使います。
 
 例：「おしり」→ `ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ`
 
@@ -115,7 +115,7 @@
 >
 > Sound Effect by [Universfield](https://pixabay.com/ja/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342) from [Pixabay](https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=293342)
 
-※ 効果音は base64 で `index.html` に内蔵しています。
+※ 効果音は `assets/`（mp3）に同梱しています。
 
 ---
 
@@ -137,7 +137,7 @@
 
 このリポジトリのソースコードは [MIT License](LICENSE) です。商用利用・改変・再配布を含めて自由に利用できます。再配布時は、LICENSE の著作権表示と許諾文を残してください。
 
-`index.html` に埋め込まれている Pixabay 提供の効果音は MIT License の対象外です。効果音の利用・再配布には、それぞれの [Pixabay Content License](https://pixabay.com/service/license-summary/) が適用されます。
+`assets/` に同梱した Pixabay 提供の効果音は MIT License の対象外です。効果音の利用・再配布には、それぞれの [Pixabay Content License](https://pixabay.com/service/license-summary/) が適用されます。
 
 ---
 
@@ -154,7 +154,8 @@
 
 ```
 oshiri-morse/
-├── index.html              # アプリ本体（HTML/CSS/JS 全部入り、効果音も base64 で内蔵）
+├── index.html              # アプリ本体（HTML/CSS/JS 全部入り）
+├── assets/                 # 効果音 whip.mp3 / pop.mp3（ﾊﾟｧｰﾝ・ﾌﾟﾘ）
 ├── kuromoji.js             # 形態素解析ライブラリ本体（同梱）
 ├── dict/                   # kuromoji の辞書ファイル一式（同梱・約17MB）
 ├── ogp.jpg                 # SNS共有用のOGP画像
