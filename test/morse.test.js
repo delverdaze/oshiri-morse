@@ -1,14 +1,13 @@
-'use strict';
-const test = require('node:test');
-const assert = require('node:assert/strict');
+import test from 'node:test';
+import assert from 'node:assert/strict';
 /*
- * 変換コアは morse.js に分離済み。Node から直接 require して検証する。
- * （ブラウザでは index.html が <script src="morse.js"> で classic script として読み込む。
- *   DOM・音声・kuromoji には非依存。tokenizer は null のため漢字→読みはパススルー）
+ * 変換コアは morse.js（ES Module）。named export を取り込んで検証する。
+ * DOM・音声・kuromoji には非依存。tokenizer 未注入のため漢字→読みはパススルー。
+ * （ESM の名前空間は読み取り専用なので、スプレッドで可変オブジェクトにしてから
+ *   テスト用の enterMarker/exitMarker を足す。以降の M.* 参照は変更不要。）
  */
-const M = require('../morse.js');
-M.enterMarker = M.ROMAJI_IN;   // 欧文モード開始マーカー
-M.exitMarker = M.ROMAJI_OUT;   // 欧文モード終了マーカー
+import * as Morse from '../morse.js';
+const M = { ...Morse, enterMarker: Morse.ROMAJI_IN, exitMarker: Morse.ROMAJI_OUT };
 const norm = (x) => x.replace(/[\s　]/g, '');
 const rt = (input) => M.decode(M.encode(input).text).text;   // 往復
 const rtNorm = (input) => norm(rt(input));
