@@ -1,37 +1,14 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-
 /*
- * 本番コード無変更ハーネス：
- * index.html から「変換コア」だけを抜き出して Node で評価する。
- * （DOM・音声・kuromoji に依存しない純粋部分のみ。tokenizer は null のため
- *   漢字→読みはパススルーされ、かな・英数字の変換/復元はそのまま検証できる）
- *
- * morse.js へ切り出した後は、この読み込み部だけ require に差し替えれば
- * 同じテストがそのまま使える。
+ * 変換コアは morse.js に分離済み。Node から直接 require して検証する。
+ * （ブラウザでは index.html が <script src="morse.js"> で classic script として読み込む。
+ *   DOM・音声・kuromoji には非依存。tokenizer は null のため漢字→読みはパススルー）
  */
-function loadCore() {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  const startMark = '/* ===== おしりモールス 変換コア ===== */';
-  const endMark = '/* ===== UI ===== */';
-  const s = html.indexOf(startMark);
-  const e = html.indexOf(endMark);
-  assert.ok(s !== -1 && e !== -1 && e > s,
-    '変換コアの範囲を index.html から取得できません（マーカーを確認）');
-  const core = html.slice(s, e);
-  const api = new Function(
-    core + '\nreturn { encode, decode, toHiraReading, H2M, E2M, NUM2M, M2H, M2E, M2NUM, DASH_N, DOT_N };'
-  )();
-  // 欧文モード切替マーカーを「コードから」抽出（テストとコードの値ズレを防ぐ）
-  api.enterMarker = (core.match(/m === "([.\-]+)"[\s\S]{0,40}?isRomajiMode = true/) || [])[1];
-  api.exitMarker = (core.match(/m === "([.\-]+)"[\s\S]{0,40}?isRomajiMode = false/) || [])[1];
-  return api;
-}
-
-const M = loadCore();
+const M = require('../morse.js');
+M.enterMarker = M.ROMAJI_IN;   // 欧文モード開始マーカー
+M.exitMarker = M.ROMAJI_OUT;   // 欧文モード終了マーカー
 const norm = (x) => x.replace(/[\s　]/g, '');
 const rt = (input) => M.decode(M.encode(input).text).text;   // 往復
 const rtNorm = (input) => norm(rt(input));
