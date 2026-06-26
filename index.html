@@ -24,7 +24,7 @@
 <body>
 <div class="wrap">
   <header>
-    <span class="peachicon" id="peach" onclick="poke(this)" title="つついてみて">🍑</span>
+    <span class="peachicon" id="peach" data-action="poke" title="つついてみて">🍑</span>
     <h1>おしりモールス変換器</h1>
     <p class="tagline">ことばにできない気持ちを、おしりに預けよう。</p>
     <div class="legend">
@@ -34,8 +34,8 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" id="tab-enc" onclick="setMode('enc')">✍️ エンコード</button>
-    <button class="tab" id="tab-dec" onclick="setMode('dec')">🔍 デコード</button>
+    <button class="tab active" id="tab-enc" data-action="mode" data-mode="enc">✍️ エンコード</button>
+    <button class="tab" id="tab-dec" data-action="mode" data-mode="dec">🔍 デコード</button>
   </div>
 
   <div class="card">
@@ -46,9 +46,9 @@
       <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
       <div class="samples">
         例文：
-        <button type="button" onclick="sample('おしり')">おしり</button>
-        <button type="button" onclick="sample('大好き')">大好き</button>
-        <button type="button" onclick="sample('ソフトタッチ')">ソフトタッチ</button>
+        <button type="button" data-action="sample" data-text="おしり">おしり</button>
+        <button type="button" data-action="sample" data-text="大好き">大好き</button>
+        <button type="button" data-action="sample" data-text="ソフトタッチ">ソフトタッチ</button>
       </div>
       <div class="arrow">⬇️ よみがな</div>
       <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
@@ -63,9 +63,9 @@
         <span class="x-post-preview-text" id="enc-x-preview-text"></span>
       </div>
       <div class="btnrow">
-        <button class="act btn-primary" onclick="copyOut('enc-out','enc-note')">📋 コピー</button>
-        <button class="act btn-listen" id="enc-listen" onclick="listen('enc-out','enc-listen')">🔊 おしりで聞く</button>
-        <button class="act btn-ghost" onclick="clearAll('enc')">🧹 クリア</button>
+        <button class="act btn-primary" data-action="copy" data-target="enc-out" data-note="enc-note">📋 コピー</button>
+        <button class="act btn-listen" id="enc-listen" data-action="listen" data-target="enc-out">🔊 おしりで聞く</button>
+        <button class="act btn-ghost" data-action="clear" data-mode="enc">🧹 クリア</button>
       </div>
     </div>
 
@@ -78,22 +78,22 @@
       <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
       <div class="note ok" id="dec-note"></div>
       <div class="btnrow">
-        <button class="act btn-primary" onclick="copyOut('dec-out','dec-note')">📋 コピー</button>
-        <button class="act btn-listen" id="dec-listen" onclick="listen('dec-in','dec-listen')">🔊 聞いて当てる</button>
-        <button class="act btn-ghost" onclick="clearAll('dec')">🧹 クリア</button>
+        <button class="act btn-primary" data-action="copy" data-target="dec-out" data-note="dec-note">📋 コピー</button>
+        <button class="act btn-listen" id="dec-listen" data-action="listen" data-target="dec-in">🔊 聞いて当てる</button>
+        <button class="act btn-ghost" data-action="clear" data-mode="dec">🧹 クリア</button>
       </div>
     </div>
   </div>
 
   <footer>
     変換はすべてブラウザ内で完結（送信なし）。<br>
-    <button type="button" class="credit-link" onclick="openCredits()">クレジット・謝辞 🍑</button>
+    <button type="button" class="credit-link" data-action="credits-open">クレジット・謝辞 🍑</button>
   </footer>
 
   <!-- クレジットモーダル -->
-  <div class="modal-overlay" id="credits-modal" onclick="if(event.target===this)closeCredits()">
+  <div class="modal-overlay" id="credits-modal">
     <div class="modal-card" role="dialog" aria-modal="true" aria-label="クレジット・謝辞">
-      <button class="modal-close" onclick="closeCredits()" aria-label="閉じる">×</button>
+      <button class="modal-close" data-action="credits-close" aria-label="閉じる">×</button>
       <h2 class="modal-title">🍑 クレジット・謝辞</h2>
       <dl class="credits">
         <dt>原案</dt>

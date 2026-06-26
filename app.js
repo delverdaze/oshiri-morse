@@ -393,6 +393,30 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); }
 document.getElementById("enc-in").addEventListener("input", runEncode);
 document.getElementById("dec-in").addEventListener("input", runDecode);
 
+/* ===== イベント委譲：data-action でクリック操作を一元管理 =====
+   インライン onclick の代替。マークアップ側は data-action（＋必要な data-*）を
+   保持するだけでよく、リデザインで構造が変わっても振る舞いを維持できる。
+   委譲ハンドラはクリックイベント中に同期実行されるため、poke/listen の
+   unlockKick はユーザージェスチャー内で発火する（iOS音声アンロックを維持）。 */
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-action]");
+  if(!el) return;
+  switch(el.dataset.action){
+    case "poke":          poke(el); break;
+    case "mode":          setMode(el.dataset.mode); break;
+    case "sample":        sample(el.dataset.text); break;
+    case "copy":          copyOut(el.dataset.target, el.dataset.note); break;
+    case "listen":        listen(el.dataset.target, el.id); break;
+    case "clear":         clearAll(el.dataset.mode); break;
+    case "credits-open":  openCredits(); break;
+    case "credits-close": closeCredits(); break;
+  }
+});
+// モーダル背景（オーバーレイ自身）のクリックで閉じる
+document.getElementById("credits-modal").addEventListener("click", e=>{
+  if(e.target.id === "credits-modal") closeCredits();
+});
+
 // バックグラウンドに入ったらAudioContextを破棄（iOSで復帰後に音が死ぬ問題対策）。
 // 復帰後は次の再生操作（ユーザー操作）で getCtx() が新しいコンテキストを作り直す。
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") teardownAudio(); });
