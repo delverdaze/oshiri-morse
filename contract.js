@@ -34,7 +34,8 @@ export const ACTION_ATTRS = {
 /* app.js / effects.js / audio.js が動的に付け外しするクラス。CSS 側に対応するスタイルが必要。
    消えても JS はエラーを出さず見た目だけ静かに壊れるため、テストで存在を担保する。 */
 export const STATE_CLASSES = [
-  "active",     // .tab.active（選択中タブ）
+  "active",       // .tab.active（選択中タブ）
+  "has-content",  // .clear-chip.has-content（入力に内容あり→クリアチップ表示）
   "ok",         // .note.ok（成功メッセージ）
   "over",       // .x-post-status.over（文字数オーバー）
   "overflow",   // .x-post-preview .overflow（超過文字の強調）

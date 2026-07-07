@@ -17,9 +17,9 @@
 <meta name="twitter:title" content="🍑 おしりモールス変換器">
 <meta name="twitter:description" content="日本語を「お尻を叩く音」のモールス信号（ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ）に変換・復元。SNSでこっそり伝えよう。">
 <meta name="twitter:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
-<title>おしりモールス変換器</title>
+<title>🍑 おしりモールス変換器</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E🍑%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=1.2.0">
 </head>
 <body>
 <div class="wrap">
@@ -34,30 +34,35 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" id="tab-enc" data-action="mode" data-mode="enc">✍️ エンコード</button>
-    <button class="tab" id="tab-dec" data-action="mode" data-mode="dec">🔍 デコード</button>
+    <button class="tab active" id="tab-enc" data-action="mode" data-mode="enc" aria-pressed="true">✍️ エンコード</button>
+    <button class="tab" id="tab-dec" data-action="mode" data-mode="dec" aria-pressed="false">🔍 デコード</button>
   </div>
 
   <div class="card">
     <!-- ENCODE -->
     <div id="panel-enc">
       <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）</div>
-      <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
-      <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
+      <div class="field">
+        <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
+        <div class="field-body">
+          <textarea id="enc-in" placeholder="例：好きです　世界"></textarea>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="enc" aria-label="入力をクリア">🧹 クリア</button>
+        </div>
+      </div>
       <div class="samples">
         例文：
         <button type="button" data-action="sample" data-text="おしり">おしり</button>
         <button type="button" data-action="sample" data-text="大好き">大好き</button>
         <button type="button" data-action="sample" data-text="ソフトタッチ">ソフトタッチ</button>
       </div>
-      <div class="arrow">⬇️ よみがな</div>
+      <div class="arrow">よみがな ↓</div>
       <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
       <textarea id="enc-yomi" class="out yomi" readonly placeholder="漢字はここで読みに変換されます"></textarea>
-      <div class="arrow">🍑 ⬇️ おしり</div>
+      <div class="arrow">🍑 おしり ↓</div>
       <label class="field-label" for="enc-out">おしりモールス（SNSにコピペ）</label>
       <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
-      <div class="note ok" id="enc-note"></div>
-      <div class="x-post-status" id="enc-x-status" aria-live="polite">𝕏 投稿：0 / 280 文字</div>
+      <div class="note ok" id="enc-note" aria-live="polite"></div>
+      <div class="x-post-status" id="enc-x-status" aria-live="polite" hidden>𝕏 投稿：0 / 280 文字</div>
       <div class="x-post-preview" id="enc-x-preview" hidden>
         <span class="x-post-preview-label">投稿できない超過分（赤）</span>
         <span class="x-post-preview-text" id="enc-x-preview-text"></span>
@@ -65,22 +70,25 @@
       <div class="btnrow">
         <button class="act btn-primary" data-action="copy" data-target="enc-out" data-note="enc-note">📋 コピー</button>
         <button class="act btn-listen" id="enc-listen" data-action="listen" data-target="enc-out">🔊 おしりで聞く</button>
-        <button class="act btn-ghost" data-action="clear" data-mode="enc">🧹 クリア</button>
       </div>
     </div>
 
     <!-- DECODE -->
     <div id="panel-dec" style="display:none">
-      <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
-      <textarea id="dec-in" placeholder="例：ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ　ﾊﾟｧｰﾝｯ‼︎ﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯ"></textarea>
-      <div class="arrow">🔍 ⬇️</div>
+      <div class="field">
+        <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
+        <div class="field-body">
+          <textarea id="dec-in" placeholder="例：ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ…"></textarea>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="dec" aria-label="入力をクリア">🧹 クリア</button>
+        </div>
+      </div>
+      <div class="arrow">🔍 復元 ↓</div>
       <label class="field-label" for="dec-out">復元された日本語</label>
       <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
-      <div class="note ok" id="dec-note"></div>
+      <div class="note ok" id="dec-note" aria-live="polite"></div>
       <div class="btnrow">
         <button class="act btn-primary" data-action="copy" data-target="dec-out" data-note="dec-note">📋 コピー</button>
         <button class="act btn-listen" id="dec-listen" data-action="listen" data-target="dec-in">🔊 聞いて当てる</button>
-        <button class="act btn-ghost" data-action="clear" data-mode="dec">🧹 クリア</button>
       </div>
     </div>
   </div>
@@ -113,6 +121,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=1.2.0"></script>
 </body>
 </html>

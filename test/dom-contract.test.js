@@ -51,16 +51,17 @@ test('各 data-action 要素が ACTION_ATTRS の必須属性を備えている',
 /* ===== 外部ファイルの読み込み ===== */
 
 test('style.css を読み込んでいる', () => {
-  assert.ok(/<link[^>]*href=["']style\.css["']/.test(html), 'style.css の <link> が無い');
+  // ?v=… のキャッシュバスト用クエリは許容する
+  assert.ok(/<link[^>]*href=["']style\.css(?:\?[^"']*)?["']/.test(html), 'style.css の <link> が無い');
 });
 
 test('app.js を ES Module として読み込んでいる', () => {
-  assert.ok(/<script[^>]*type=["']module["'][^>]*src=["']app\.js["']/.test(html),
+  assert.ok(/<script[^>]*type=["']module["'][^>]*src=["']app\.js(?:\?[^"']*)?["']/.test(html),
     'app.js が <script type="module"> で読み込まれていない（ESM前提）');
 });
 
 test('classic script で morse.js / contract.js / app.js を読み込んでいない（import で解決）', () => {
   // ESM では依存は import が解決する。classic な <script src="..."> での重複読込が無いこと。
-  assert.ok(!/<script\s+src=["'](?:morse|contract|app)\.js["']/.test(html),
+  assert.ok(!/<script\s+src=["'](?:morse|contract|app)\.js(?:\?[^"']*)?["']/.test(html),
     'classic script で morse/contract/app を読み込んでいる（ESM では不要・二重実行の恐れ）');
 });

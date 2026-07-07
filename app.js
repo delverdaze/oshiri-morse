@@ -30,6 +30,18 @@ function setMode(m){
   dom["panel-dec"].style.display = m==="dec" ? "" : "none";
   dom["tab-enc"].classList.toggle("active", m==="enc");
   dom["tab-dec"].classList.toggle("active", m==="dec");
+  dom["tab-enc"].setAttribute("aria-pressed", m==="enc");
+  dom["tab-dec"].setAttribute("aria-pressed", m==="dec");
+}
+
+/* クリアチップの表示制御：入力に内容がある間だけチップ自身に has-content を付ける。
+   CSS 側（.clear-chip.has-content）が表示を担う。他の状態クラス
+   （.tab.active / .modal-overlay.open 等）と同じ「要素自身に付ける」流儀に統一。
+   ※ :placeholder-shown の兄弟セレクタは Chromium が動的に再評価しないため JS で行う */
+function syncHasContent(m){
+  const field = dom[m+"-in"].closest(".field");
+  const chip = field && field.querySelector(".clear-chip");
+  if(chip) chip.classList.toggle("has-content", dom[m+"-in"].value.trim().length > 0);
 }
 
 let dictState = "idle";   // 辞書ロード状態（dict ローダーが更新）
@@ -37,6 +49,7 @@ let dictState = "idle";   // 辞書ロード状態（dict ローダーが更新�
 function runEncode(){
   const v = dom["enc-in"].value;
   const note = dom["enc-note"];
+  syncHasContent("enc");
   if(!v.trim()){
     dom["enc-out"].value="";
     dom["enc-yomi"].value="";
@@ -73,6 +86,7 @@ function updateXPostCounter(text){
   const previewText = dom["enc-x-preview-text"];
   const measured = measureXPost(text);
   const overflow = measured.length - X_POST_LIMIT;
+  status.hidden = !text;   // 出力が空の間はカウンタ自体を出さない
   status.classList.toggle("over", overflow > 0);
   if(overflow > 0){
     status.textContent = "⚠️ おしりが𝕏の枠からはみ出しています（" + overflow + " 文字オーバー）";
@@ -93,6 +107,7 @@ function updateXPostCounter(text){
 function runDecode(){
   const v = dom["dec-in"].value;
   const note = dom["dec-note"];
+  syncHasContent("dec");
   if(!v.trim()){ dom["dec-out"].value=""; note.textContent=""; return; }
   const r = decode(v);
   dom["dec-out"].value = r.text;
@@ -112,6 +127,7 @@ function clearAll(m){
   if(m==="enc") dom["enc-yomi"].value="";
   if(m==="enc") updateXPostCounter("");
   dom[m+"-note"].textContent="";
+  syncHasContent(m);
   dom[m+"-in"].focus();
 }
 // クリップボードAPIが使えない/拒否される環境（iOSのBrave等）向けの同期コピー。
@@ -167,10 +183,31 @@ function listen(srcId, btnId){
   audio.playOshiri(text, btn, dom["peach"]);
 }
 
-/* ===== クレジットモーダル ===== */
-function openCredits(){ dom["credits-modal"].classList.add("open"); }
-function closeCredits(){ dom["credits-modal"].classList.remove("open"); }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeCredits(); });
+/* ===== クレジットモーダル =====
+   開時：フォーカスをモーダル内（閉じるボタン）へ移し、Tab をモーダル内で循環させる。
+   閉時：開く前にフォーカスしていた要素へ戻す。Esc で閉じる。 */
+let lastFocusEl = null;
+function openCredits(){
+  lastFocusEl = document.activeElement;
+  dom["credits-modal"].classList.add("open");
+  const closeBtn = dom["credits-modal"].querySelector(".modal-close");
+  if(closeBtn) closeBtn.focus();
+}
+function closeCredits(){
+  if(!dom["credits-modal"].classList.contains("open")) return;
+  dom["credits-modal"].classList.remove("open");
+  if(lastFocusEl && typeof lastFocusEl.focus === "function") lastFocusEl.focus();
+  lastFocusEl = null;
+}
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape"){ closeCredits(); return; }
+  if(e.key !== "Tab" || !dom["credits-modal"].classList.contains("open")) return;
+  const focusables = dom["credits-modal"].querySelectorAll("a[href], button");
+  if(!focusables.length) return;
+  const first = focusables[0], last = focusables[focusables.length - 1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
 
 /* ===== イベント委譲：data-action でクリック操作を一元管理 =====
    インライン onclick の代替。マークアップ側は data-action（＋必要な data-*）を

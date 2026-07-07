@@ -66,6 +66,7 @@
 | クラス | 付く対象 | 意味 |
 |---|---|---|
 | `active` | タブ | 選択中のタブ |
+| `has-content` | `.clear-chip`（クリアチップ自身） | 入力に内容あり（チップ表示） |
 | `open` | `#credits-modal` | モーダル表示中 |
 | `playing` | 再生ボタン | 再生中（停止表示・アニメーション） |
 | `wiggle` | `#peach` | 揺れアニメーション |
@@ -75,6 +76,13 @@
 | `note` / `note ok` | `*-note` | 警告（赤）／成功（緑）メッセージ |
 | `dict-status loading` / `ready` / `fail` | `#dict-status` | 辞書ロードの状態 |
 
+補足（app.js が参照する構造上のフック。無くてもエラーにはならないが機能が静かに落ちる）：
+
+- 入力欄（`enc-in` / `dec-in`）は **`.field` クラスのラッパー内**に置く
+  （`closest(".field")` で `has-content` を付け外しする）。
+- モーダル内の閉じるボタンは **`.modal-close` クラス**を持つ
+  （モーダルを開いた際のフォーカス移動先）。
+
 ---
 
 ## 4. スクリプトの読み込み順（変更しないこと）
@@ -82,8 +90,12 @@
 `</body>` 直前で、必ず **この順**の classic script として読み込みます。
 
 ```html
-<script type="module" src="app.js"></script>   <!-- これ1本だけ -->
+<script type="module" src="app.js?v=1.2.0"></script>   <!-- これ1本だけ -->
 ```
+
+`?v=…` はキャッシュバスト用のバージョンクエリ。`style.css` / `app.js` を変更して
+公開する際は、この番号を上げると既存訪問者のキャッシュに新旧ファイルが
+混在する事故（例：新CSS＋旧JSでクリアチップが出ない）を防げる。
 
 `app.js` が ES Module として依存を `import` で解決します（手動の読み込み順管理は不要）。
 
