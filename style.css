@@ -94,6 +94,8 @@
 
 /* ---------- ベース ---------- */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+/* hidden 属性を author スタイル（display 指定）より常に優先させる */
+[hidden]{display:none !important;}
 body{
   margin:0;
   font-family:ui-rounded,"Hiragino Maru Gothic ProN","Hiragino Sans",
