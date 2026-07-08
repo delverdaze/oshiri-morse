@@ -115,6 +115,18 @@ body{
 ::selection{background:var(--accent-soft);}
 .wrap{max-width:700px;margin:0 auto;}
 
+/* タップ用 UI 部品：ダブルタップズームと選択ハイライトを抑止。
+   コピー対象（textarea・𝕏プレビュー本文・クレジット本文）は選択可能なまま。 */
+button,.peachicon{
+  touch-action:manipulation;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;user-select:none;
+}
+header,label.field-label,.arrow,.samples,.dict-status,.note,
+.x-post-status,.x-post-preview-label,.modal-title,footer{
+  -webkit-user-select:none;user-select:none;
+}
+
 /* ---------- ヘッダー ---------- */
 header{text-align:center;margin:4px 0 24px;}
 h1{
@@ -126,7 +138,7 @@ h1{
 .peachicon{
   font-size:clamp(2.8rem,9vw,3.4rem);
   display:inline-block;line-height:1;margin-bottom:8px;
-  cursor:pointer;position:relative;user-select:none;
+  cursor:pointer;position:relative;
   filter:drop-shadow(0 8px 14px rgba(214,58,88,.3));
   animation:floaty 3.6s ease-in-out infinite;
   transition:transform .18s ease;
