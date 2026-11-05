@@ -65,3 +65,17 @@ test('classic script で morse.js / contract.js / app.js を読み込んでい�
   assert.ok(!/<script\s+src=["'](?:morse|contract|app)\.js(?:\?[^"']*)?["']/.test(html),
     'classic script で morse/contract/app を読み込んでいる（ESM では不要・二重実行の恐れ）');
 });
+
+/* ===== Content-Security-Policy ===== */
+test('CSP の meta タグがあり、スクリプトを同一オリジンに限定している', () => {
+  const m = html.match(/<meta[^>]*http-equiv=["']Content-Security-Policy["'][^>]*content="([^"]*)"/i);
+  assert.ok(m, 'CSP の <meta http-equiv="Content-Security-Policy"> が無い');
+  assert.ok(/script-src 'self'(;|$)/.test(m[1]), `script-src が 'self' のみになっていない: ${m[1]}`);
+  assert.ok(!/unsafe-(inline|eval)/.test(m[1]), `CSP に unsafe-* が含まれている: ${m[1]}`);
+});
+
+test('CSP でブロックされるインライン記述が index.html に無い', () => {
+  assert.ok(!/<script(?![^>]*\bsrc=)[^>]*>/.test(html), 'インライン <script> がある（CSP でブロックされる）');
+  assert.ok(!/\sstyle=["']/.test(html), 'style 属性がある（CSP でブロックされる。クラスか hidden 属性を使う）');
+  assert.ok(!/\son[a-z]+=["']/.test(html), 'onclick 等のインラインハンドラがある（CSP でブロックされる）');
+});
