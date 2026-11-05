@@ -26,8 +26,9 @@ if (missing.length) {
 let mode = "enc";
 function setMode(m){
   mode = m;
-  dom["panel-enc"].style.display = m==="enc" ? "" : "none";
-  dom["panel-dec"].style.display = m==="dec" ? "" : "none";
+  // hidden 属性で切り替える（CSP の style-src 'self' はインライン style 属性を禁止するため）
+  dom["panel-enc"].hidden = m!=="enc";
+  dom["panel-dec"].hidden = m!=="dec";
   dom["tab-enc"].classList.toggle("active", m==="enc");
   dom["tab-dec"].classList.toggle("active", m==="dec");
   dom["tab-enc"].setAttribute("aria-pressed", m==="enc");

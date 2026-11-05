@@ -23,7 +23,7 @@
 |---|---|---|
 | `peach` | 🍑 アイコン（つつくと反応） | クリック可能な要素 |
 | `tab-enc` / `tab-dec` | エンコード／デコードのタブ | クリック可能な要素 |
-| `panel-enc` / `panel-dec` | 各モードのパネル | `style.display` で表示切替される |
+| `panel-enc` / `panel-dec` | 各モードのパネル | `hidden` 属性で表示切替される（初期状態で `panel-dec` に `hidden`） |
 | `dict-status` | 漢字辞書のロード状態表示 | テキストとクラスが差し替わる |
 | `enc-in` | エンコード入力 | `<textarea>`（`input` イベントで変換） |
 | `enc-yomi` | 読み（ひらがな）プレビュー | `<textarea readonly>` |
