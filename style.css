@@ -66,6 +66,9 @@
   --slow:240ms;
 
   /* アイコン（lucide, ISC License） */
+  --ic-sun:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2'/%3E%3Cpath d='M12 20v2'/%3E%3Cpath d='m4.93 4.93 1.41 1.41'/%3E%3Cpath d='m17.66 17.66 1.41 1.41'/%3E%3Cpath d='M2 12h2'/%3E%3Cpath d='M20 12h2'/%3E%3Cpath d='m6.34 17.66-1.41 1.41'/%3E%3Cpath d='m19.07 4.93-1.41 1.41'/%3E%3C/svg%3E");
+  --ic-moon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/%3E%3C/svg%3E");
+  --ic-monitor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='14' x='2' y='3' rx='2'/%3E%3Cpath d='M8 21h8'/%3E%3Cpath d='M12 17v4'/%3E%3C/svg%3E");
   --ic-pen:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z'/%3E%3C/svg%3E");
   --ic-search:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
   --ic-eraser:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21'/%3E%3Cpath d='M22 21H7'/%3E%3Cpath d='m5 11 9 9'/%3E%3C/svg%3E");
@@ -77,8 +80,9 @@
   --ic-book:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
 }
 
+/* ダークの色。端末がダークの時（「ライト」を選んだ時を除く）と、「ダーク」を選んだ時に当てる */
 @media (prefers-color-scheme:dark){
-  :root{
+  :root:not([data-theme="light"]){
     color-scheme:dark;
 
     --bg-base:#211a1e;
@@ -119,6 +123,47 @@
 
     --overlay:rgba(12,8,10,.66);
   }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+
+  --bg-base:#211a1e;
+  --bg-dot:rgba(255,140,160,.06);
+  --blob-a:rgba(255,125,110,.10);
+  --blob-b:rgba(255,110,160,.08);
+
+  --card:#2d2329;
+  --field:#352a30;
+  --field-out:#3a2b31;
+  --seg-bg:#281f24;
+  --seg-active:#463339;
+
+  --ink:#f6e8e6;
+  --ink-soft:#c2a6ab;
+
+  --line:#4d3a41;
+  --line-strong:#5d454d;
+  --tape:#7a4654;
+
+  --accent:#ff7d92;
+  --accent-deep:#f75f7b;
+  --accent-ink:#ff8fa1;
+  --accent-soft:#48303a;
+  --btn-bg:#ff7d92;      /* ダークは明るいピンク＋濃い文字（7.18:1） */
+  --btn-ink:#2a1218;
+  --ring:rgba(255,125,146,.35);
+
+  --good:#6fd7a0;
+  --warn:#ffa478;      --warn-bg:#40302a;  --warn-line:#5f4438;
+  --honey:#e9c37a;     --honey-bg:#3a2f21; --honey-line:#57462c;
+  --bad-hl-bg:#5c2a2e; --bad-hl-ink:#ffb3ab;
+
+  /* ダークは影でなく面の段差と細い線で奥行きを出す */
+  --shadow:none;
+  --shadow-sm:none;
+  --shadow-btn:inset 0 1px 0 rgba(255,255,255,.12);
+
+  --overlay:rgba(12,8,10,.66);
 }
 
 /* ---------- ベース ---------- */
@@ -169,9 +214,31 @@ header,label.field-label,.arrow,.samples,.dict-status,.note,
 .i-copy{--icon:var(--ic-copy);}
 .i-volume{--icon:var(--ic-volume);}
 .i-stop{--icon:var(--ic-stop);}
+.i-sun{--icon:var(--ic-sun);}
+.i-moon{--icon:var(--ic-moon);}
+.i-monitor{--icon:var(--ic-monitor);}
 
 /* ---------- ヘッダー ---------- */
-header{text-align:center;margin:4px 0 24px;}
+header{position:relative;text-align:center;margin:4px 0 24px;}
+
+/* 表示の切り替え（右上・3 択） */
+.theme-pick{
+  position:absolute;top:0;right:0;display:flex;gap:2px;padding:2px;
+  border:1px solid var(--line);border-radius:10px;background:var(--seg-bg);
+}
+.theme-pick button{
+  width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+  border:0;border-radius:8px;background:transparent;color:var(--ink-soft);cursor:pointer;
+  transition:background-color var(--fast) var(--ease),color var(--fast) var(--ease);
+}
+.theme-pick button:hover{color:var(--ink);}
+.theme-pick button[aria-checked="true"]{background:var(--seg-active);color:var(--accent-ink);box-shadow:var(--shadow-sm);}
+.theme-pick button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* 表示を切り替えた時、画面全体をゆっくりクロスフェード（app.js の setTheme） */
+::view-transition-old(root),::view-transition-new(root){
+  animation-duration:1.5s;animation-timing-function:ease-in-out;
+}
 h1{
   font-size:clamp(1.55rem,5.5vw,2.05rem);
   margin:0;
@@ -423,4 +490,5 @@ footer a:hover{opacity:.8;}
   *{transition:none !important;}
   .peachicon,.dict-status.loading,.modal-card{animation:none !important;}
   .puff{display:none;}
+  ::view-transition-old(root),::view-transition-new(root){animation:none;}
 }

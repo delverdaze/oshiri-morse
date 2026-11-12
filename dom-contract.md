@@ -56,6 +56,7 @@
 | `clear` | `data-mode="enc"` / `"dec"` | 入力・出力をクリア |
 | `credits-open` | — | クレジットのモーダルを開く |
 | `credits-close` | — | クレジットのモーダルを閉じる |
+| `theme` | `data-value="auto"` / `"light"` / `"dark"` | 表示の切り替え（選択は localStorage `oshiri-theme` に保存。描画前の適用は `theme-init.js`） |
 
 ---
 

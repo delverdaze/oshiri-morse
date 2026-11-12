@@ -167,6 +167,7 @@ oshiri-morse/
 ├── index.html              # マークアップ（構造のみ。<script type=module src=app.js> 1本）
 ├── style.css               # スタイル（配色・レイアウト・アニメーション）
 ├── app.js                  # UI統合（DOM結線・委譲・辞書ロード）。各モジュールを import
+├── theme-init.js           # 表示（自動／ライト／ダーク）を描画前に当てる（<head> で同期読込）
 ├── morse.js                # 変換コア（純粋ロジック・ES Module）
 ├── xpost.js                # 𝕏 文字数カウント（純粋・ES Module）
 ├── effects.js              # ペチッ！の演出（ES Module）

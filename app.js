@@ -210,6 +210,33 @@ document.addEventListener("keydown", e=>{
   else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
 });
 
+/* ===== 表示（自動／ライト／ダーク）の切り替え =====
+   描画前の適用は theme-init.js が行う。ここでは選択の保存と、押した時の切り替え。
+   急に色が変わると目に痛いので、View Transitions で画面全体をゆっくりクロスフェードする
+   （長さは style.css の ::view-transition-*(root)。未対応のブラウザと「動きを減らす」設定では即時）。 */
+const THEME_KEY = "oshiri-theme";
+function currentTheme(){
+  const t = document.documentElement.getAttribute("data-theme");
+  return (t === "light" || t === "dark") ? t : "auto";
+}
+function markTheme(){
+  const t = currentTheme();
+  document.querySelectorAll('[data-action="theme"]').forEach(b => b.setAttribute("aria-checked", String(b.dataset.value === t)));
+}
+function applyTheme(t){
+  const root = document.documentElement;
+  if(t === "light" || t === "dark") root.setAttribute("data-theme", t); else root.removeAttribute("data-theme");
+  try{ if(t === "light" || t === "dark") localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); }catch(e){}
+  markTheme();
+}
+function setTheme(t){
+  if(t === currentTheme()) return;
+  const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(document.startViewTransition && !calm) document.startViewTransition(() => applyTheme(t));
+  else applyTheme(t);
+}
+markTheme();
+
 /* ===== イベント委譲：data-action でクリック操作を一元管理 =====
    インライン onclick の代替。マークアップ側は data-action（＋必要な data-*）を
    保持するだけでよく、リデザインで構造が変わっても振る舞いを維持できる。
@@ -224,6 +251,7 @@ const ACTIONS = {
   "clear":         el => clearAll(el.dataset.mode),
   "credits-open":  () => openCredits(),
   "credits-close": () => closeCredits(),
+  "theme":         el => setTheme(el.dataset.value),
 };
 document.addEventListener("click", e=>{
   const el = e.target.closest("[data-action]");
