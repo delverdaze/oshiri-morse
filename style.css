@@ -307,17 +307,18 @@ h1{
 }
 
 /* 辞書ロード状態（app.js が className を丸ごと差し替える） */
+/* 入力欄と見分けが付くよう、枠も面も持たない「状態の一行」にする（失敗した時だけ枠付き） */
 .dict-status{
   display:flex;align-items:center;gap:8px;
-  font-size:.82rem;font-weight:500;border-radius:10px;padding:8px 12px;margin:0 0 16px;
-  border:1px solid var(--line);background:var(--field);color:var(--ink-soft);
+  font-size:.82rem;font-weight:500;border-radius:10px;padding:0;margin:0 0 16px;
+  border:1px solid transparent;background:none;color:var(--ink-soft);
   --icon:var(--ic-book);
 }
 .dict-status.loading{animation:statusPulse 1.6s ease-in-out infinite;}
 @keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.6;}}
 .dict-status.ready{--icon:var(--ic-check);}
 .dict-status.ready::before{color:var(--good);}
-.dict-status.fail{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);--icon:var(--ic-alert);}
+.dict-status.fail{padding:8px 12px;background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);--icon:var(--ic-alert);}
 
 label.field-label{
   display:block;font-size:.85rem;font-weight:500;margin:0 0 8px;color:var(--ink-soft);
@@ -356,18 +357,19 @@ textarea.yomi{
   min-height:56px;background:var(--honey-bg);border-color:var(--honey-line);
   color:var(--honey);font-weight:500;letter-spacing:.03em;
 }
-/* 主役：おしりモールス（と復元結果）の欄。紙テープのように上下に罫を引く */
+/* 主役：おしりモールス（と復元結果）の欄。紙テープのように欄の外側・上下に罫を引く
+   （罫を欄の中に描くと、長い文をスクロールした時に文字と重なるため外に出した） */
+.tape{position:relative;padding:8px 0;}
+.tape::before,.tape::after{
+  content:"";position:absolute;left:12px;right:12px;height:1px;background:var(--tape);
+}
+.tape::before{top:0;}
+.tape::after{bottom:0;}
 textarea.out:not(.yomi){
-  min-height:148px;padding:20px 20px;
+  display:block;min-height:148px;padding:16px 20px;
   font-size:1.15rem;line-height:2;letter-spacing:.02em;
   border-color:var(--tape);
   background-color:var(--field-out);
-  background-image:
-    linear-gradient(var(--tape),var(--tape)),
-    linear-gradient(var(--tape),var(--tape));
-  background-size:calc(100% - 24px) 1px;
-  background-position:12px 8px,12px calc(100% - 8px);
-  background-repeat:no-repeat;
 }
 
 /* 変換フローの区切り（ラベル＋「・－」のモールス柄の線） */
