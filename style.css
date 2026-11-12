@@ -17,7 +17,6 @@
 
   /* 背景 */
   --bg-base:#fff6f1;
-  --bg-dot:rgba(244,120,140,.10);
   /* 色のにじみ：2 つ・薄め（2026-11 の見直しで 3 つ → 2 つ、濃さ 6 割） */
   --blob-a:rgba(255,190,168,.33);
   --blob-b:rgba(255,175,196,.27);
@@ -86,7 +85,6 @@
     color-scheme:dark;
 
     --bg-base:#211a1e;
-    --bg-dot:rgba(255,140,160,.06);
     --blob-a:rgba(255,125,110,.10);
     --blob-b:rgba(255,110,160,.08);
 
@@ -128,7 +126,6 @@
   color-scheme:dark;
 
   --bg-base:#211a1e;
-  --bg-dot:rgba(255,140,160,.06);
   --blob-a:rgba(255,125,110,.10);
   --blob-b:rgba(255,110,160,.08);
 
@@ -178,9 +175,7 @@ body{
   background-color:var(--bg-base);
   background-image:
     radial-gradient(circle 420px at 12% -4%,  var(--blob-a), transparent 70%),
-    radial-gradient(circle 460px at 96% 12%,  var(--blob-b), transparent 70%),
-    radial-gradient(var(--bg-dot) 1.5px, transparent 1.6px);
-  background-size:auto,auto,28px 28px;
+    radial-gradient(circle 460px at 96% 12%,  var(--blob-b), transparent 70%);
   min-height:100vh;
   padding:clamp(16px,4vw,32px) 16px 64px;
   line-height:1.6;
