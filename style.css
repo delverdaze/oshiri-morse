@@ -18,9 +18,9 @@
   /* 背景 */
   --bg-base:#fff6f1;
   --bg-dot:rgba(244,120,140,.10);
-  --blob-a:rgba(255,190,168,.55);
-  --blob-b:rgba(255,175,196,.45);
-  --blob-c:rgba(255,224,170,.40);
+  /* 色のにじみ：2 つ・薄め（2026-11 の見直しで 3 つ → 2 つ、濃さ 6 割） */
+  --blob-a:rgba(255,190,168,.33);
+  --blob-b:rgba(255,175,196,.27);
 
   /* 面 */
   --card:#fffdfc;
@@ -83,9 +83,8 @@
 
     --bg-base:#211a1e;
     --bg-dot:rgba(255,140,160,.06);
-    --blob-a:rgba(255,125,110,.16);
-    --blob-b:rgba(255,110,160,.13);
-    --blob-c:rgba(255,190,110,.10);
+    --blob-a:rgba(255,125,110,.10);
+    --blob-b:rgba(255,110,160,.08);
 
     --card:#2d2329;
     --field:#352a30;
@@ -135,9 +134,8 @@ body{
   background-image:
     radial-gradient(circle 420px at 12% -4%,  var(--blob-a), transparent 70%),
     radial-gradient(circle 460px at 96% 12%,  var(--blob-b), transparent 70%),
-    radial-gradient(circle 520px at 50% 108%, var(--blob-c), transparent 72%),
     radial-gradient(var(--bg-dot) 1.5px, transparent 1.6px);
-  background-size:auto,auto,auto,28px 28px;
+  background-size:auto,auto,28px 28px;
   min-height:100vh;
   padding:clamp(16px,4vw,32px) 16px 64px;
   line-height:1.6;
