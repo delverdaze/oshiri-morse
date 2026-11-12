@@ -22,14 +22,14 @@
 <meta name="twitter:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
 <title>おしりモールス変換器</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E🍑%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css?v=1.2.3">
+<link rel="stylesheet" href="style.css?v=1.3.0">
 </head>
 <body>
 <div class="wrap">
   <header>
     <span class="peachicon" id="peach" data-action="poke" title="つついてみて">🍑</span>
     <h1>おしりモールス変換器</h1>
-    <p class="tagline">ことばにできない気持ちを、おしりに預けよう。</p>
+    <p class="tagline">ことばにできない気持ちを、おしりに預けよう</p>
     <div class="legend">
       <span>長点 <b>－</b> → <b>ﾊﾟｧｰﾝｯ‼︎</b></span>
       <span>短点 <b>・</b> → <b>ﾌﾟﾘｯ</b></span>
@@ -37,23 +37,23 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" id="tab-enc" data-action="mode" data-mode="enc" aria-pressed="true">✍️ エンコード</button>
-    <button class="tab" id="tab-dec" data-action="mode" data-mode="dec" aria-pressed="false">🔍 デコード</button>
+    <button class="tab active" id="tab-enc" data-action="mode" data-mode="enc" aria-pressed="true"><span class="i i-pen" aria-hidden="true"></span>エンコード</button>
+    <button class="tab" id="tab-dec" data-action="mode" data-mode="dec" aria-pressed="false"><span class="i i-search" aria-hidden="true"></span>デコード</button>
   </div>
 
   <div class="card">
     <!-- ENCODE -->
     <div id="panel-enc">
-      <div class="dict-status loading" id="dict-status">📖 漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）</div>
+      <div class="dict-status loading" id="dict-status">漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）</div>
       <div class="field">
         <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
         <div class="field-body">
           <textarea id="enc-in" placeholder="例：月が綺麗ですね"></textarea>
-          <button type="button" class="clear-chip" data-action="clear" data-mode="enc" aria-label="入力をクリア">🧹 クリア</button>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="enc" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
         </div>
       </div>
       <div class="samples">
-        例文：
+        <span class="samples-label">例文</span>
         <button type="button" data-action="sample" data-text="おしり">おしり</button>
         <button type="button" data-action="sample" data-text="大好き">大好き</button>
         <button type="button" data-action="sample" data-text="ソフトタッチ">ソフトタッチ</button>
@@ -61,7 +61,7 @@
       <div class="arrow">よみがな ↓</div>
       <label class="field-label" for="enc-yomi">読み（ひらがな）— 読み方が合っているか確認してね</label>
       <textarea id="enc-yomi" class="out yomi" readonly placeholder="漢字はここで読みに変換されます"></textarea>
-      <div class="arrow">🍑 おしり ↓</div>
+      <div class="arrow">おしり ↓</div>
       <label class="field-label" for="enc-out">おしりモールス（SNSにコピペ）</label>
       <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
       <div class="note ok" id="enc-note" aria-live="polite"></div>
@@ -71,8 +71,8 @@
         <span class="x-post-preview-text" id="enc-x-preview-text"></span>
       </div>
       <div class="btnrow">
-        <button class="act btn-primary" data-action="copy" data-target="enc-out" data-note="enc-note">📋 コピー</button>
-        <button class="act btn-listen" id="enc-listen" data-action="listen" data-target="enc-out">🔊 おしりで聞く</button>
+        <button class="act btn-primary" data-action="copy" data-target="enc-out" data-note="enc-note"><span class="i i-copy" aria-hidden="true"></span>コピー</button>
+        <button class="act btn-listen" id="enc-listen" data-action="listen" data-target="enc-out"><span class="i i-volume" aria-hidden="true"></span>おしりで聞く</button>
       </div>
     </div>
 
@@ -82,35 +82,35 @@
         <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
         <div class="field-body">
           <textarea id="dec-in" placeholder="例：ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ…"></textarea>
-          <button type="button" class="clear-chip" data-action="clear" data-mode="dec" aria-label="入力をクリア">🧹 クリア</button>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="dec" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
         </div>
       </div>
-      <div class="arrow">🔍 復元 ↓</div>
+      <div class="arrow">復元 ↓</div>
       <label class="field-label" for="dec-out">復元された日本語</label>
       <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
       <div class="note ok" id="dec-note" aria-live="polite"></div>
       <div class="btnrow">
-        <button class="act btn-primary" data-action="copy" data-target="dec-out" data-note="dec-note">📋 コピー</button>
-        <button class="act btn-listen" id="dec-listen" data-action="listen" data-target="dec-in">🔊 聞いて当てる</button>
+        <button class="act btn-primary" data-action="copy" data-target="dec-out" data-note="dec-note"><span class="i i-copy" aria-hidden="true"></span>コピー</button>
+        <button class="act btn-listen" id="dec-listen" data-action="listen" data-target="dec-in"><span class="i i-volume" aria-hidden="true"></span>聞いて当てる</button>
       </div>
     </div>
   </div>
 
   <footer>
-    変換はすべてブラウザ内で完結（送信なし）。<br>
-    <button type="button" class="credit-link" data-action="credits-open">クレジット・謝辞 🍑</button>
+    変換はすべてブラウザ内で完結（送信なし）<br>
+    <button type="button" class="credit-link" data-action="credits-open">クレジット・謝辞</button>
   </footer>
 
   <!-- クレジットモーダル -->
   <div class="modal-overlay" id="credits-modal">
     <div class="modal-card" role="dialog" aria-modal="true" aria-label="クレジット・謝辞">
       <button class="modal-close" data-action="credits-close" aria-label="閉じる">×</button>
-      <h2 class="modal-title">🍑 クレジット・謝辞</h2>
+      <h2 class="modal-title">クレジット・謝辞</h2>
       <dl class="credits">
         <dt>原案</dt>
         <dd>
           <a href="https://note.com/gorira_yurusan/n/n6b4b79ee8601" target="_blank" rel="noopener">God-eternal バンディクー さん（@gorira_yurusan）</a><br>
-          「おしりモールス信号」にインスパイアされて作りました🙏
+          「おしりモールス信号」にインスパイアされて作りました
         </dd>
         <dt>開発</dt>
         <dd><a href="https://x.com/delverdaze" target="_blank" rel="noopener">@delverdaze</a></dd>
@@ -124,6 +124,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=1.2.3"></script>
+<script type="module" src="app.js?v=1.3.0"></script>
 </body>
 </html>

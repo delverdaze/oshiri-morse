@@ -65,7 +65,7 @@ function runEncode(){
     dom["enc-yomi"].value="";
     updateXPostCounter("");
     note.className = "note";
-    note.textContent = "📖 漢字の読みを準備中…（完了すると自動で変換します）";
+    note.textContent = "漢字の読みを準備中…（完了すると自動で変換します）";
     return;
   }
   dom["enc-yomi"].value = toHiraReading(v);
@@ -77,8 +77,8 @@ function runEncode(){
   if(changed && r.text) puffThrottled(outEl);
   if(r.unknown.length){
     note.className = "note";
-    note.textContent = "⚠️ 変換できない文字：" + r.unknown.join(" ") + "（ひらがな・カタカナのみ対応）";
-  } else { note.className="note ok"; note.textContent="✅ おしり化、完了。"; }
+    note.textContent = "変換できない文字：" + r.unknown.join(" ") + "（ひらがな・カタカナのみ対応）";
+  } else { note.className="note ok"; note.textContent="おしり化、完了"; }
 }
 
 function updateXPostCounter(text){
@@ -90,7 +90,7 @@ function updateXPostCounter(text){
   status.hidden = !text;   // 出力が空の間はカウンタ自体を出さない
   status.classList.toggle("over", overflow > 0);
   if(overflow > 0){
-    status.textContent = "⚠️ おしりが𝕏の枠からはみ出しています（" + overflow + " 文字オーバー）";
+    status.textContent = "おしりが𝕏の枠からはみ出しています（" + overflow + " 文字オーバー）";
     preview.hidden = false;
     previewText.replaceChildren();
     const allowed = document.createElement("span");
@@ -114,11 +114,11 @@ function runDecode(){
   dom["dec-out"].value = r.text;
   if(r.text === ""){
     note.className="note";
-    note.textContent = "⚠️ おしりモールスではありません。ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ を貼ってね。";
+    note.textContent = "おしりモールスではありません。ﾊﾟｧｰﾝｯ‼︎ / ﾌﾟﾘｯ を貼ってね。";
   } else if(r.bad.length){
     note.className="note";
-    note.textContent = "⚠️ 解読できない符号がありました（【?】部分）";
-  } else { note.className="note ok"; note.textContent="✅ 復元できました"; }
+    note.textContent = "解読できない符号がありました（【?】部分）";
+  } else { note.className="note ok"; note.textContent="復元できました"; }
 }
 
 function sample(t){ dom["enc-in"].value = t; runEncode(); }
@@ -157,8 +157,8 @@ function copyOut(id, noteId){
   const txt = target.value;
   if(!txt){ return; }
   const done = (ok)=>{
-    if(ok){ note.className="note ok"; note.textContent="📋 コピーしました！"; puffFrom(target, 3); }
-    else  { note.className="note"; note.textContent="⚠️ コピーできませんでした。出力を長押しして選択 → コピーしてください。"; }
+    if(ok){ note.className="note ok"; note.textContent="コピーしました"; puffFrom(target, 3); }
+    else  { note.className="note"; note.textContent="コピーできませんでした。出力を長押しして選択 → コピーしてください。"; }
   };
   // まずユーザー操作中（同期）に execCommand コピー。iOS Safari/Brave 等で確実に動く。
   if(legacyCopy(txt)){ done(true); return; }
@@ -255,7 +255,7 @@ function failDict(){
   if(dictTimer) clearTimeout(dictTimer);
   dictState = "failed";
   status.className = "dict-status fail";
-  status.textContent = "⚠️ 漢字辞書を読み込めませんでした（ひらがな・カタカナ・英数字は利用できます）";
+  status.textContent = "漢字辞書を読み込めませんでした（ひらがな・カタカナ・英数字は利用できます）";
   runEncode();
 }
 
@@ -272,7 +272,7 @@ function buildTokenizer(){
         dictState = "ready";
         const status = dom["dict-status"];
         status.className = "dict-status ready";
-        status.textContent = "✅ 漢字のままでOK（読みをひらがなにしてから変換します）";
+        status.textContent = "漢字のままでOK（読みをひらがなにしてから変換します）";
         runEncode();
       });
   }catch(e){ failDict(); }
@@ -283,7 +283,7 @@ function requestDict(){
   dictState = "loading";
   const status = dom["dict-status"];
   status.className = "dict-status loading";
-  status.textContent = "📖 漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）";
+  status.textContent = "漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）";
   const script = document.createElement("script");
   script.src = "kuromoji.js";
   script.async = true;

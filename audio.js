@@ -174,7 +174,7 @@ export async function playOshiri(text, btn, peach){
   const total = (t - ctx.currentTime) * 1000;
   if(btn){
     if(!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
-    btn.innerHTML = "⏹ 停止";
+    btn.innerHTML = '<span class="i i-stop" aria-hidden="true"></span>停止';
     btn.classList.add("playing");
   }
   if(peach) peach.classList.add("wiggle");
