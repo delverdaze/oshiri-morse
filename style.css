@@ -2,7 +2,7 @@
    おしりモールス変換器 — “Peach Pop” デザイン
    ライト／ダーク両対応（prefers-color-scheme）。
    JS が付け外しする状態クラス（contract.js STATE_CLASSES）:
-     active / ok / over / overflow / playing / wiggle / puff /
+     active / ok / overflow / playing / wiggle / puff /
      open / loading / ready / fail
    @keyframes puffRise / wiggle は effects.js・audio.js が参照。
 
@@ -196,7 +196,7 @@ button,.peachicon{
   -webkit-user-select:none;user-select:none;
 }
 header,label.field-label,.arrow,.samples,.dict-status,.note,
-.x-post-status,.x-post-preview-label,.modal-title,footer{
+.x-post-status,.modal-title,footer{
   -webkit-user-select:none;user-select:none;
 }
 
@@ -429,19 +429,14 @@ button.act:active{transform:scale(.98);}
 }
 .note.ok{color:var(--ink-soft);--icon:var(--ic-check);}
 .note.ok::before{color:var(--good);}
+/* 𝕏の文字数と超過分。チャットで送る人には上限が無いので、注意の色やアイコン、
+   枠は付けず、𝕏に投稿する人への参考として控えめに出す。超過分は赤で示す */
 .x-post-status{
-  display:inline-block;margin-top:12px;padding:4px 12px;
-  border:1px solid var(--line);border-radius:8px;
-  background:var(--field);color:var(--ink-soft);font-size:.82rem;font-weight:500;
+  margin-top:8px;color:var(--ink-soft);font-size:.82rem;font-weight:500;
   font-variant-numeric:tabular-nums;
 }
-.x-post-status.over{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);}
-.x-post-preview{
-  margin-top:8px;padding:12px 16px;border:1px solid var(--warn-line);border-radius:10px;
-  background:var(--field);color:var(--ink-soft);font-size:.8rem;line-height:1.65;
-}
-.x-post-preview-label{display:block;margin-bottom:4px;font-weight:600;color:var(--warn);}
-.x-post-preview-text{display:block;max-height:8.2em;overflow:auto;white-space:pre-wrap;word-break:break-all;}
+.x-post-preview{margin-top:4px;color:var(--ink-soft);font-size:.8rem;line-height:1.65;}
+.x-post-preview-text{display:block;position:relative;max-height:8.2em;overflow:auto;white-space:pre-wrap;word-break:break-all;}
 .x-post-preview .overflow{color:var(--bad-hl-ink);background:var(--bad-hl-bg);font-weight:600;border-radius:4px;}
 
 /* ---------- フッター ---------- */
