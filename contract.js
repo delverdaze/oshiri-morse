@@ -29,6 +29,7 @@ export const ACTION_ATTRS = {
   "clear":         ["data-mode"],
   "credits-open":  [],
   "credits-close": [],
+  "theme":         ["data-value"],   // 表示の切り替え（auto / light / dark）
 };
 
 /* app.js / effects.js / audio.js が動的に付け外しするクラス。CSS 側に対応するスタイルが必要。
