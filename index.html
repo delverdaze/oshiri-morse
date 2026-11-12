@@ -22,8 +22,8 @@
 <meta name="twitter:image" content="https://delverdaze.github.io/oshiri-morse/ogp.jpg">
 <title>おしりモールス変換器</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E🍑%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css?v=1.3.1">
-<script src="theme-init.js?v=1.3.1"></script>
+<link rel="stylesheet" href="style.css?v=1.3.2">
+<script src="theme-init.js?v=1.3.2"></script>
 </head>
 <body>
 <div class="wrap">
@@ -52,10 +52,12 @@
     <div id="panel-enc">
       <div class="dict-status loading" id="dict-status">漢字辞書を読み込み中…（ひらがな・カタカナ・英数字は今すぐ使えます）</div>
       <div class="field">
-        <label class="field-label" for="enc-in">日本語（漢字・ひらがな・カタカナ）を入力</label>
+        <div class="field-head">
+          <label class="field-label" for="enc-in">ことばを入力</label>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="enc" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
+        </div>
         <div class="field-body">
           <textarea id="enc-in" placeholder="例：月が綺麗ですね"></textarea>
-          <button type="button" class="clear-chip" data-action="clear" data-mode="enc" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
         </div>
       </div>
       <div class="samples">
@@ -69,9 +71,7 @@
       <textarea id="enc-yomi" class="out yomi" readonly placeholder="漢字はここで読みに変換されます"></textarea>
       <div class="arrow">おしり ↓</div>
       <label class="field-label" for="enc-out">おしりモールス（SNSにコピペ）</label>
-      <div class="tape">
-        <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
-      </div>
+      <textarea id="enc-out" class="out" readonly placeholder="ここに ﾊﾟｧｰﾝｯ‼︎ ﾌﾟﾘｯ が出力されます"></textarea>
       <div class="note ok" id="enc-note" aria-live="polite"></div>
       <div class="x-post-status" id="enc-x-status" aria-live="polite" hidden>𝕏 投稿：0 / 280 文字</div>
       <div class="x-post-preview" id="enc-x-preview" hidden>
@@ -87,17 +87,17 @@
     <!-- DECODE -->
     <div id="panel-dec" hidden>
       <div class="field">
-        <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
+        <div class="field-head">
+          <label class="field-label" for="dec-in">おしりモールスを貼り付け</label>
+          <button type="button" class="clear-chip" data-action="clear" data-mode="dec" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
+        </div>
         <div class="field-body">
           <textarea id="dec-in" placeholder="例：ﾌﾟﾘｯﾊﾟｧｰﾝｯ‼︎ﾌﾟﾘｯﾌﾟﾘｯﾌﾟﾘｯ…"></textarea>
-          <button type="button" class="clear-chip" data-action="clear" data-mode="dec" aria-label="入力をクリア"><span class="i i-eraser" aria-hidden="true"></span>クリア</button>
         </div>
       </div>
       <div class="arrow">復元 ↓</div>
-      <label class="field-label" for="dec-out">復元された日本語</label>
-      <div class="tape">
-        <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
-      </div>
+      <label class="field-label" for="dec-out">復元されたことば</label>
+      <textarea id="dec-out" class="out" readonly placeholder="ここに元のことばが戻ります"></textarea>
       <div class="note ok" id="dec-note" aria-live="polite"></div>
       <div class="btnrow">
         <button class="act btn-primary" data-action="copy" data-target="dec-out" data-note="dec-note"><span class="i i-copy" aria-hidden="true"></span>コピー</button>
@@ -134,6 +134,6 @@
   </div>
 </div>
 
-<script type="module" src="app.js?v=1.3.1"></script>
+<script type="module" src="app.js?v=1.3.2"></script>
 </body>
 </html>
