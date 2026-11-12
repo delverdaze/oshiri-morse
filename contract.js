@@ -38,7 +38,6 @@ export const STATE_CLASSES = [
   "active",       // .tab.active（選択中タブ）
   "has-content",  // .clear-chip.has-content（入力に内容あり→クリアチップ表示）
   "ok",         // .note.ok（成功メッセージ）
-  "over",       // .x-post-status.over（文字数オーバー）
   "overflow",   // .x-post-preview .overflow（超過文字の強調）
   "playing",    // .btn-listen.playing（再生中）
   "wiggle",     // .peachicon.wiggle（揺れ）

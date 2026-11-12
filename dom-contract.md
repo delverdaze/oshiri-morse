@@ -29,8 +29,8 @@
 | `enc-yomi` | 読み（ひらがな）プレビュー | `<textarea readonly>` |
 | `enc-out` | エンコード出力 | `<textarea readonly>` |
 | `enc-note` | エンコードのメッセージ表示 | テキストが差し替わる |
-| `enc-x-status` | 𝕏 文字数カウンター | テキストとクラスが差し替わる |
-| `enc-x-preview` | 超過分プレビューの枠 | `hidden` 属性で表示切替 |
+| `enc-x-status` | 𝕏 の文字数オーバーのお知らせ | 280 文字を超えた時だけ `hidden` を外す |
+| `enc-x-preview` | 超過分プレビュー | `hidden` 属性で表示切替 |
 | `enc-x-preview-text` | 超過分プレビュー本文 | 子要素が差し替わる |
 | `enc-listen` | エンコードの再生ボタン | **id 必須**（再生状態の追跡・ラベル差替に使用） |
 | `dec-in` | デコード入力 | `<textarea>`（`input` イベントで変換） |
@@ -71,7 +71,6 @@
 | `open` | `#credits-modal` | モーダル表示中 |
 | `playing` | 再生ボタン | 再生中（停止表示・アニメーション） |
 | `wiggle` | `#peach` | 揺れアニメーション |
-| `over` | `#enc-x-status` | 文字数オーバー |
 | `overflow` | プレビュー内の `<span>` | 超過した文字の強調 |
 | `puff` | 動的生成の `<span>` | ペチッ！の飛び散り演出 |
 | `note` / `note ok` | `*-note` | 警告（赤）／成功（緑）メッセージ |

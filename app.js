@@ -87,10 +87,11 @@ function updateXPostCounter(text){
   const previewText = dom["enc-x-preview-text"];
   const measured = measureXPost(text);
   const overflow = measured.length - X_POST_LIMIT;
-  status.hidden = !text;   // 出力が空の間はカウンタ自体を出さない
-  status.classList.toggle("over", overflow > 0);
+  // 𝕏の上限（280 文字）を超えた時だけ出す。収まる時や出力が空の時は何も出さない
+  status.hidden = overflow <= 0;
   if(overflow > 0){
-    status.textContent = "おしりが𝕏の枠からはみ出しています（" + overflow + " 文字オーバー）";
+    // チャットなら文字数の上限は無いので、「𝕏に投稿する場合」と条件を付けて控えめに書く
+    status.textContent = "𝕏に投稿する場合は文字数オーバーです";
     preview.hidden = false;
     previewText.replaceChildren();
     const allowed = document.createElement("span");
@@ -99,11 +100,18 @@ function updateXPostCounter(text){
     excess.className = "overflow";
     excess.textContent = text.slice(measured.validEnd);
     previewText.append(allowed, excess);
+    scrollPreviewToCut();
   } else {
-    status.textContent = "𝕏 投稿：" + measured.length + " / " + X_POST_LIMIT + " 文字（残り " + (X_POST_LIMIT - measured.length) + "）";
     preview.hidden = true;
     previewText.replaceChildren();
   }
+}
+/* 超過分の始まり（切れ目）が見えるよう、その 1 行上までスクロールする */
+function scrollPreviewToCut(){
+  const previewText = dom["enc-x-preview-text"];
+  const excess = previewText.querySelector(".overflow");
+  if(!excess) return;
+  previewText.scrollTop = Math.max(0, excess.offsetTop - parseFloat(getComputedStyle(previewText).lineHeight));
 }
 function runDecode(){
   const v = dom["dec-in"].value;
